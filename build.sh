@@ -1,1 +1,1 @@
-docker save -o ReportBoxFrontendService.tar mr.amperage/report_box_frontend_service:0.0.1
+docker buildx build --platform linux/amd64 -t mr.amperage/report_box_frontend_service:0.0.1 .
