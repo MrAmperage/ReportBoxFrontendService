@@ -49,3 +49,41 @@ jobs:
             ${{ env.IMAGE_NAME }}:${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+  deploy:
+    name: Deploy to production
+    needs: build
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Configure SSH
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.PROD_SSH_KEY }}
+          SSH_KNOWN_HOSTS: ${{ secrets.PROD_KNOWN_HOSTS }}
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          printf '%s\n' "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/known_hosts
+
+      - name: Deploy container
+        env:
+          SSH_HOST: ${{ secrets.PROD_HOST }}
+          SSH_PORT: ${{ secrets.PROD_PORT }}
+          SSH_USER: ${{ secrets.PROD_USER }}
+        run: |
+          ssh \
+            -i ~/.ssh/id_ed25519 \
+            -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes \
+            -p "$SSH_PORT" \
+            "$SSH_USER@$SSH_HOST" \
+            "cd /opt/reportbox/frontend-service &&
+             docker compose pull &&
+             docker compose up -d --remove-orphans &&
+             curl --fail --silent --show-error \
+               --retry 10 \
+               --retry-delay 2 \
+               --retry-connrefused \
+               http://127.0.0.1/ > /dev/null"
