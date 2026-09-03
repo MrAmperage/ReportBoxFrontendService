@@ -8,4 +8,4 @@ import { RouterOutlet } from '@angular/router';
   imports: [RouterOutlet],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export default class shell {}
+export default class Shell {}
