@@ -86,4 +86,5 @@ jobs:
                --retry 10 \
                --retry-delay 2 \
                --retry-connrefused \
-               http://127.0.0.1/ > /dev/null"
+               http://127.0.0.1/ > /dev/null &&
+               docker image prune --force --filter until=168h"
