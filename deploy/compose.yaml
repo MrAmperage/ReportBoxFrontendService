@@ -1,0 +1,7 @@
+services:
+  frontend:
+    image: mramperage/reportbox-frontend-service:latest
+    container_name: reportbox-frontend-service
+    restart: unless-stopped
+    ports:
+      - "80:80"
