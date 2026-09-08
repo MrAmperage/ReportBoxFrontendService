@@ -1,10 +1,12 @@
 import { ChangeDetectionStrategy, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { Deck } from 'deck.gl';
+import DeckGlService from '../deckglService/deckglService';
 
 @Component({
   selector: 'deckgl',
   templateUrl: './deckgl.html',
   styleUrl: './deckgl.css',
+  providers: [DeckGlService],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class DeckGl implements OnInit {
