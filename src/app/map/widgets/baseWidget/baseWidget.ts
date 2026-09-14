@@ -1,6 +1,6 @@
 import { Widget } from 'deck.gl';
 import DeckGlService from '../../deckglService/deckglService';
-import { OnInit, Component, Directive } from '@angular/core';
+import { OnInit, Directive } from '@angular/core';
 @Directive({ selector: 'BaseWidget' })
 export default abstract class BaseWidget extends Widget implements OnInit {
   constructor(private DeckGlService: DeckGlService) {
@@ -16,4 +16,6 @@ export default abstract class BaseWidget extends Widget implements OnInit {
   ngOnInit(): void {
     this.InitWidget();
   }
+
+  Register() {}
 }
