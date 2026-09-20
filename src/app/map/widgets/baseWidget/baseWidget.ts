@@ -1,7 +1,9 @@
 import { Widget } from 'deck.gl';
 import DeckGlService from '../../deckglService/deckglService';
-import { OnInit, Directive, ElementRef } from '@angular/core';
-@Directive({ selector: 'BaseWidget' })
+import { OnInit, Directive, ElementRef, HostBinding } from '@angular/core';
+@Directive({
+  selector: 'BaseWidget',
+})
 export default abstract class BaseWidget extends Widget implements OnInit {
   constructor(
     private DeckGlService: DeckGlService,
@@ -9,6 +11,9 @@ export default abstract class BaseWidget extends Widget implements OnInit {
   ) {
     super({});
   }
+  override className: string = '';
+  @HostBinding('class.Widget')
+  IsBindHostClass = true;
 
   InitWidget() {
     const Widgets = this.DeckGlService.DeckGl.props.widgets;
