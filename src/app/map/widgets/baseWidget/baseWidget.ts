@@ -5,17 +5,18 @@ import { OnInit, Directive, ElementRef } from '@angular/core';
 export default abstract class BaseWidget extends Widget implements OnInit {
   constructor(
     private DeckGlService: DeckGlService,
-    private ElementRef: ElementRef,
+    private ElementRef: ElementRef<HTMLDivElement>,
   ) {
-    super({ _container: ElementRef.nativeElement });
+    super({});
   }
 
   InitWidget() {
     const Widgets = this.DeckGlService.DeckGl.props.widgets;
-    Widgets.push(this);
-    this.DeckGlService.DeckGl.setProps({ widgets: Widgets });
+    this.DeckGlService.DeckGl.setProps({ widgets: [...Widgets, this] });
   }
-
+  override onAdd(): HTMLDivElement {
+    return this.ElementRef.nativeElement;
+  }
   ngOnInit(): void {
     this.InitWidget();
   }
