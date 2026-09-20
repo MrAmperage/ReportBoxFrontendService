@@ -5,10 +5,11 @@ import { BaseWidgetOptions } from './deckglServiceTypes';
 
 @Injectable()
 export default class DeckGlService {
-  Deck!: Deck;
+  DeckGl!: Deck;
   readonly WidgetOptionsMap: Map<string, BehaviorSubject<any>> = new Map();
   SetDeck(Deck: Deck) {
-    this.Deck = Deck;
+    this.DeckGl = Deck;
+    return this.DeckGl;
   }
 
   UpdateOptions<OptionType>(Id: string, Option: Partial<OptionType>) {

@@ -1,16 +1,19 @@
 import { Widget } from 'deck.gl';
 import DeckGlService from '../../deckglService/deckglService';
-import { OnInit, Directive } from '@angular/core';
+import { OnInit, Directive, ElementRef } from '@angular/core';
 @Directive({ selector: 'BaseWidget' })
 export default abstract class BaseWidget extends Widget implements OnInit {
-  constructor(private DeckGlService: DeckGlService) {
-    super({});
+  constructor(
+    private DeckGlService: DeckGlService,
+    private ElementRef: ElementRef,
+  ) {
+    super({ _container: ElementRef.nativeElement });
   }
 
   InitWidget() {
-    const Widgets = this.DeckGlService.Deck.props.widgets;
+    const Widgets = this.DeckGlService.DeckGl.props.widgets;
     Widgets.push(this);
-    this.DeckGlService.Deck.setProps({ widgets: Widgets });
+    this.DeckGlService.DeckGl.setProps({ widgets: Widgets });
   }
 
   ngOnInit(): void {
