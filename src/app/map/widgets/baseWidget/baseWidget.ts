@@ -1,6 +1,7 @@
 import { Widget } from 'deck.gl';
 import DeckGlService from '../../deckglService/deckglService';
 import { OnInit, Directive, ElementRef, HostBinding } from '@angular/core';
+import { WidgetPlacement } from './baseWidgetTypes';
 @Directive({
   selector: 'BaseWidget',
 })
@@ -12,6 +13,7 @@ export default abstract class BaseWidget extends Widget implements OnInit {
     super({});
   }
   override className: string = '';
+  override placement: WidgetPlacement = 'top-left';
   @HostBinding('class.Widget')
   IsBindHostClass = true;
 
@@ -25,6 +27,6 @@ export default abstract class BaseWidget extends Widget implements OnInit {
   ngOnInit(): void {
     this.InitWidget();
   }
-
+  override onRenderHTML(rootElement: HTMLElement): void {}
   Register() {}
 }

@@ -6,9 +6,4 @@ import BaseWidget from '../baseWidget/baseWidget';
   templateUrl: './transportWidget.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export default class TransportWidget extends BaseWidget {
-  override placement: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' | 'fill' =
-    'top-left';
-  override onRenderHTML(rootElement: HTMLElement): void {}
-  override className: string = '';
-}
+export default class TransportWidget extends BaseWidget {}
