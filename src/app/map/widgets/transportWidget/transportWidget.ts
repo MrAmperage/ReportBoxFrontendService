@@ -8,5 +8,5 @@ import { TransportWidgetOptions } from './transportWidgetTypes';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class TransportWidget extends BaseWidget<TransportWidgetOptions> {
-  Options = { Id: BaseWidget.CreateWidgetKey('TransportWidget') };
+  Options = { Id: 'TransportWidget' };
 }

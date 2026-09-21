@@ -26,6 +26,7 @@ export default abstract class BaseWidget<Options extends BaseWidgetOptions>
   InitWidget() {
     const Widgets = this.DeckGlService.DeckGl.props.widgets;
     this.DeckGlService.DeckGl.setProps({ widgets: [...Widgets, this] });
+    this.setProps({ id: this.Options.Id });
     const NewOptions = this.DeckGlService.RegisterWidget(this.Options);
     NewOptions.subscribe((Value) => {
       this.Options = Value;

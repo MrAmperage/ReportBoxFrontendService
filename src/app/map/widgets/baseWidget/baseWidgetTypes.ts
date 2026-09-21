@@ -1,6 +1,6 @@
 export type WidgetPlacement = 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' | 'fill';
 
-export type BaseWidgetOptions = { Id: BaseWidgetKey<BaseWidgetOptions> };
+export type BaseWidgetOptions = { readonly Id: string };
 
 declare const WidgetOptionsType: unique symbol;
 

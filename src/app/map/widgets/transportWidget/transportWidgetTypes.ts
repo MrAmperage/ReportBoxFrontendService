@@ -1,3 +1,1 @@
-import { BaseWidgetKey } from '../baseWidget/baseWidgetTypes';
-
-export type TransportWidgetOptions = { Id: BaseWidgetKey<TransportWidgetOptions> };
+export type TransportWidgetOptions = { Id: string };
