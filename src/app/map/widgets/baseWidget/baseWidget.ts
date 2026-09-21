@@ -1,19 +1,29 @@
 import { Widget } from 'deck.gl';
 import DeckGlService from '../../deckglService/deckglService';
-import { OnInit, Directive, ElementRef, HostBinding, ChangeDetectorRef } from '@angular/core';
+import {
+  OnInit,
+  Directive,
+  ElementRef,
+  HostBinding,
+  ChangeDetectorRef,
+  OnDestroy,
+  DestroyRef,
+} from '@angular/core';
 import { BaseWidgetKey, BaseWidgetOptions, WidgetPlacement } from './baseWidgetTypes';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Directive({
   selector: 'BaseWidget',
 })
 export default abstract class BaseWidget<Options extends BaseWidgetOptions>
   extends Widget
-  implements OnInit
+  implements OnInit, OnDestroy
 {
   constructor(
     private DeckGlService: DeckGlService,
     private ElementRef: ElementRef<HTMLDivElement>,
     private ChangeDetectorRef: ChangeDetectorRef,
+    private DestroyRef: DestroyRef,
   ) {
     super({});
   }
@@ -49,5 +59,8 @@ export default abstract class BaseWidget<Options extends BaseWidgetOptions>
     Id: string,
   ): BaseWidgetKey<OptionsType> {
     return Id as BaseWidgetKey<OptionsType>;
+  }
+  ngOnDestroy(): void {
+    this.DeckGlService.UnregisterWidget(this.Options.Id);
   }
 }

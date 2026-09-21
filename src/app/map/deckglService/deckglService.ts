@@ -25,7 +25,16 @@ export default class DeckGlService {
       });
     }
   }
+  UnregisterWidget(Id: string): void {
+    const Subject = this.WidgetOptionsMap.get(Id);
 
+    if (Subject === undefined) {
+      return;
+    }
+
+    Subject.complete();
+    this.WidgetOptionsMap.delete(Id);
+  }
   RegisterWidget<OptionsType extends BaseWidgetOptions>(
     Options: OptionsType,
   ): BehaviorSubject<OptionsType> {
