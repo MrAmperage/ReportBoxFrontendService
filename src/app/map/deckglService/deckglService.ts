@@ -7,7 +7,7 @@ import { BaseWidgetOptions, WidgetKey } from '../widgets/baseWidget/baseWidgetTy
 @Injectable()
 export default class DeckGlService {
   DeckGl!: Deck;
-  readonly WidgetOptionsMap: Map<string, BehaviorSubject<any>> = new Map();
+  readonly WidgetOptionsMap: Map<string, BehaviorSubject<BaseWidgetOptions>> = new Map();
   SetDeck(Deck: Deck) {
     this.DeckGl = Deck;
     return this.DeckGl;
@@ -27,15 +27,16 @@ export default class DeckGlService {
   }
 
   RegisterWidget<OptionsType extends BaseWidgetOptions>(
-    Options: OptionsType,
     Key: WidgetKey<OptionsType>,
-  ) {
+    Options: NoInfer<OptionsType>,
+  ): void {
     if (this.WidgetOptionsMap.has(Key)) {
       throw new Error(`Виджет ${Key} уже зарегистрирован`);
-    } else {
-      this.WidgetOptionsMap.set(Options.Id, new BehaviorSubject(Options));
     }
+
+    this.WidgetOptionsMap.set(Key, new BehaviorSubject<BaseWidgetOptions>(Options));
   }
+
   GetOptions<OptionsType extends BaseWidgetOptions>(
     Key: WidgetKey<OptionsType>,
   ): Observable<OptionsType> {
@@ -43,6 +44,6 @@ export default class DeckGlService {
     if (Option === undefined) {
       throw new Error(`Виджет ${Key} не зарегистрирован`);
     }
-    return Option as BehaviorSubject<OptionsType>;
+    return Option as unknown as BehaviorSubject<OptionsType>;
   }
 }
