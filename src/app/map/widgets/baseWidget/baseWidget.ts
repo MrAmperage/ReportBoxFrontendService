@@ -37,6 +37,7 @@ export default abstract class BaseWidget<Options extends BaseWidgetOptions>
     this.DeckGlService.DeckGl.setProps({ widgets: [...Widgets, this] });
     const NewOptions = this.DeckGlService.RegisterWidget(this.Options);
     NewOptions.subscribe((Value) => {
+      console.log('Новые опции', NewOptions.getValue());
       this.Options = Value;
     });
   }
@@ -45,6 +46,9 @@ export default abstract class BaseWidget<Options extends BaseWidgetOptions>
   }
   ngOnInit(): void {
     this.InitWidget();
+  }
+  GetOptionsByKey(Key: BaseWidgetKey<BaseWidgetOptions>) {
+    return this.DeckGlService.GetOptions(Key);
   }
   UpdateOptions(NewOptions: Partial<Omit<BaseWidgetOptions, 'Id'>>) {
     this.DeckGlService.UpdateOptions(this.Options.Id, NewOptions);
