@@ -14,7 +14,7 @@ export default class DeckGlService {
   }
 
   UpdateOptions<OptionsType extends BaseWidgetOptions>(
-    Key: BaseWidgetKey<OptionsType>,
+    Key: string,
     Options: Partial<Omit<OptionsType, 'Id'>>,
   ): void {
     const SubjectOption = this.WidgetOptionsMap.get(Key);

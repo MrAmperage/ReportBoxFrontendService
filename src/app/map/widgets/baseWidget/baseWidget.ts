@@ -1,8 +1,8 @@
 import { Widget } from 'deck.gl';
 import DeckGlService from '../../deckglService/deckglService';
-import { OnInit, Directive, ElementRef, HostBinding } from '@angular/core';
+import { OnInit, Directive, ElementRef, HostBinding, ChangeDetectorRef } from '@angular/core';
 import { BaseWidgetKey, BaseWidgetOptions, WidgetPlacement } from './baseWidgetTypes';
-import { BehaviorSubject, Subject } from 'rxjs';
+
 @Directive({
   selector: 'BaseWidget',
 })
@@ -13,6 +13,7 @@ export default abstract class BaseWidget<Options extends BaseWidgetOptions>
   constructor(
     private DeckGlService: DeckGlService,
     private ElementRef: ElementRef<HTMLDivElement>,
+    private ChangeDetectorRef: ChangeDetectorRef,
   ) {
     super({});
   }
@@ -25,8 +26,8 @@ export default abstract class BaseWidget<Options extends BaseWidgetOptions>
 
   InitWidget() {
     const Widgets = this.DeckGlService.DeckGl.props.widgets;
-    this.DeckGlService.DeckGl.setProps({ widgets: [...Widgets, this] });
     this.setProps({ id: this.Options.Id });
+    this.DeckGlService.DeckGl.setProps({ widgets: [...Widgets, this] });
     const NewOptions = this.DeckGlService.RegisterWidget(this.Options);
     NewOptions.subscribe((Value) => {
       this.Options = Value;
@@ -37,6 +38,10 @@ export default abstract class BaseWidget<Options extends BaseWidgetOptions>
   }
   ngOnInit(): void {
     this.InitWidget();
+  }
+  UpdateOptions(NewOptions: Partial<Omit<BaseWidgetOptions, 'Id'>>) {
+    this.DeckGlService.UpdateOptions(this.Options.Id, NewOptions);
+    this.ChangeDetectorRef.detectChanges();
   }
   override onRenderHTML(rootElement: HTMLElement): void {}
 
