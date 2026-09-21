@@ -7,10 +7,8 @@ import {
   HostBinding,
   ChangeDetectorRef,
   OnDestroy,
-  DestroyRef,
 } from '@angular/core';
 import { BaseWidgetKey, BaseWidgetOptions, WidgetPlacement } from './baseWidgetTypes';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Directive({
   selector: 'BaseWidget',
@@ -23,7 +21,6 @@ export default abstract class BaseWidget<Options extends BaseWidgetOptions>
     private DeckGlService: DeckGlService,
     private ElementRef: ElementRef<HTMLDivElement>,
     private ChangeDetectorRef: ChangeDetectorRef,
-    private DestroyRef: DestroyRef,
   ) {
     super({});
   }
