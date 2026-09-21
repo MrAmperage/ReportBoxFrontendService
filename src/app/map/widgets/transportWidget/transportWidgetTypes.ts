@@ -1,5 +1,3 @@
-import BaseWidget from '../baseWidget/baseWidget';
+import { BaseWidgetKey } from '../baseWidget/baseWidgetTypes';
 
-export type TransportWidgetOptions = { Id: 'TransportWidget' };
-export const TransportWidgetKey =
-  BaseWidget.CreateWidgetKey<TransportWidgetOptions>('TransportWidget');
+export type TransportWidgetOptions = { Id: BaseWidgetKey<TransportWidgetOptions> };

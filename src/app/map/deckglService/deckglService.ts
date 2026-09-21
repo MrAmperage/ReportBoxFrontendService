@@ -2,19 +2,19 @@ import { Injectable } from '@angular/core';
 import { Deck } from 'deck.gl';
 import { BehaviorSubject, Observable } from 'rxjs';
 
-import { BaseWidgetOptions, WidgetKey } from '../widgets/baseWidget/baseWidgetTypes';
+import { BaseWidgetOptions, BaseWidgetKey } from '../widgets/baseWidget/baseWidgetTypes';
 
 @Injectable()
 export default class DeckGlService {
   DeckGl!: Deck;
-  readonly WidgetOptionsMap: Map<string, BehaviorSubject<BaseWidgetOptions>> = new Map();
+  readonly WidgetOptionsMap: Map<string, BehaviorSubject<any>> = new Map();
   SetDeck(Deck: Deck) {
     this.DeckGl = Deck;
     return this.DeckGl;
   }
 
   UpdateOptions<OptionsType extends BaseWidgetOptions>(
-    Key: WidgetKey<OptionsType>,
+    Key: BaseWidgetKey<OptionsType>,
     Options: Partial<Omit<OptionsType, 'Id'>>,
   ): void {
     const SubjectOption = this.WidgetOptionsMap.get(Key);
@@ -27,18 +27,18 @@ export default class DeckGlService {
   }
 
   RegisterWidget<OptionsType extends BaseWidgetOptions>(
-    Key: WidgetKey<OptionsType>,
-    Options: NoInfer<OptionsType>,
-  ): void {
-    if (this.WidgetOptionsMap.has(Key)) {
-      throw new Error(`Виджет ${Key} уже зарегистрирован`);
+    Options: OptionsType,
+  ): BehaviorSubject<OptionsType> {
+    if (this.WidgetOptionsMap.has(Options.Id)) {
+      throw new Error(`Виджет ${Options.Id} уже зарегистрирован`);
     }
-
-    this.WidgetOptionsMap.set(Key, new BehaviorSubject<BaseWidgetOptions>(Options));
+    const NewOptions = new BehaviorSubject(Options);
+    this.WidgetOptionsMap.set(Options.Id, NewOptions);
+    return NewOptions;
   }
 
   GetOptions<OptionsType extends BaseWidgetOptions>(
-    Key: WidgetKey<OptionsType>,
+    Key: BaseWidgetKey<OptionsType>,
   ): Observable<OptionsType> {
     const Option = this.WidgetOptionsMap.get(Key);
     if (Option === undefined) {
