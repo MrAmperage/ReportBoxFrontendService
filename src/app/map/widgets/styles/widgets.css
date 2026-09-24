@@ -1,0 +1,11 @@
+:root {
+  --widget-background: #001529;
+  --widget-text-color: #ffffff;
+}
+.Widget {
+  background-color: var(--widget-background);
+  color: var(--widget-text-color);
+  pointer-events: auto;
+  cursor: default;
+  border-radius: 3px;
+}

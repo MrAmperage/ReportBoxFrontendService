@@ -1,1 +1,3 @@
 @import './styles/reset.css';
+@import './app/map/widgets/styles/widgets.css';
+@import './../node_modules/ng-zorro-antd/style/index.min.css';
