@@ -1,7 +1,8 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import BaseWidget from '../baseWidget/baseWidget';
 import { PhysicsWidgetOptions } from './physicsWidgetTypes';
-import { World } from '@dimforge/rapier3d-compat';
+import { ColliderDesc, RigidBody, World } from '@dimforge/rapier3d-compat';
+import ExportApi from '../baseWidget/ExportApiDecorator';
 
 @Component({
   selector: 'PhysicsWidget',
@@ -32,7 +33,10 @@ export default class PhysicsWidget extends BaseWidget<PhysicsWidgetOptions> {
     this.DestroyPhysics();
     super.DestroyWidget();
   }
-
+  @ExportApi()
+  AddCollider(ColliderDescription: ColliderDesc, Parent?: RigidBody) {
+    this.World.createCollider(ColliderDescription, Parent);
+  }
   DestroyPhysics() {
     this.World.free();
   }
