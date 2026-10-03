@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Deck } from 'deck.gl';
+import { Deck, Layer } from 'deck.gl';
 import { BehaviorSubject, Observable } from 'rxjs';
 
 import { BaseWidgetOptions, BaseWidgetKey } from '../widgets/baseWidget/baseWidgetTypes';
@@ -44,6 +44,43 @@ export default class DeckGlService {
     const NewOptions = new BehaviorSubject(Options);
     this.WidgetOptionsMap.set(Options.Id, NewOptions);
     return NewOptions;
+  }
+
+  AddLayer(Layer: Layer): void {
+    const Layers = this.DeckGl.props.layers ?? [];
+    const IsHasLayer = Layers.some((CurrentLayer) => (CurrentLayer as Layer).id === Layer.id);
+    if (IsHasLayer) {
+      throw new Error(`Слой ${Layer.id} уже добавлен`);
+    } else {
+      this.DeckGl.setProps({
+        layers: [...Layers, Layer],
+      });
+    }
+  }
+
+  UpdateLayer(Layer: Layer): void {
+    const Layers = this.DeckGl.props.layers ?? [];
+    if (!Layers.some((CurrentLayer) => (CurrentLayer as Layer).id === Layer.id)) {
+      throw new Error(`Слой ${Layer.id} не найден`);
+    } else {
+      this.DeckGl.setProps({
+        layers: Layers.map((CurrentLayer) =>
+          (CurrentLayer as Layer).id === Layer.id ? Layer : CurrentLayer,
+        ),
+      });
+    }
+  }
+
+  RemoveLayer(Id: string): void {
+    const Layers = this.DeckGl.props.layers ?? [];
+
+    if (!Layers.some((Layer) => (Layer as Layer).id === Id)) {
+      return;
+    } else {
+      this.DeckGl.setProps({
+        layers: Layers.filter((Layer) => (Layer as Layer).id !== Id),
+      });
+    }
   }
 
   GetOptions<OptionsType extends BaseWidgetOptions>(
