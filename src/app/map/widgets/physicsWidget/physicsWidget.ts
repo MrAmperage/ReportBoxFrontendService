@@ -27,22 +27,15 @@ export default class PhysicsWidget extends BaseWidget<PhysicsWidgetOptions> {
   Options = {
     Id: 'PhysicsWidget',
   };
-
+  private readonly MaxStepsPerFrame = 5;
   private readonly PhysicsTimeStep = 1 / 60;
-
   private LastPhysicsTime = performance.now();
-
   private PhysicsAccumulator = 0;
-
   private PhysicsAnimationFrameId: number | undefined = undefined;
-
   private World!: World;
-
   private Rapier!: typeof import('@dimforge/rapier3d-compat');
-
   override InitWidget(): void {
     super.InitWidget();
-
     this.InitPhysics();
   }
 
@@ -201,18 +194,17 @@ export default class PhysicsWidget extends BaseWidget<PhysicsWidgetOptions> {
     this.World.timestep = this.PhysicsTimeStep;
     this.LastPhysicsTime = performance.now();
     this.PhysicsAccumulator = 0;
-    const MaxStepsPerFrame = 5;
     const Step = (CurrentTime: number) => {
       const DeltaTime = (CurrentTime - this.LastPhysicsTime) / 1000;
       this.LastPhysicsTime = CurrentTime;
       this.PhysicsAccumulator += DeltaTime;
       let Steps = 0;
-      while (this.PhysicsAccumulator >= this.PhysicsTimeStep && Steps < MaxStepsPerFrame) {
+      while (this.PhysicsAccumulator >= this.PhysicsTimeStep && Steps < this.MaxStepsPerFrame) {
         this.World.step();
         this.PhysicsAccumulator -= this.PhysicsTimeStep;
         Steps++;
       }
-      if (Steps === MaxStepsPerFrame) {
+      if (Steps === this.MaxStepsPerFrame) {
         this.PhysicsAccumulator %= this.PhysicsTimeStep;
       }
       this.UpdateLayer(new PhysicsDebugLayer(this.World, [0, 0, 0]));
