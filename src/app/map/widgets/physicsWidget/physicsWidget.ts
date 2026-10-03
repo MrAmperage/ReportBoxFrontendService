@@ -61,12 +61,15 @@ export default class PhysicsWidget extends BaseWidget<PhysicsWidgetOptions> {
   RemoveCollider(Collider: Collider, WakeUp: boolean = true): void {
     this.World.removeCollider(Collider, WakeUp);
   }
-
-  DestroyPhysics() {
-    if (this.PhysicsAnimationFrameId !== undefined) {
-      cancelAnimationFrame(this.PhysicsAnimationFrameId);
-      this.PhysicsAnimationFrameId = undefined;
+  StopPhysics(): void {
+    if (this.PhysicsAnimationFrameId === undefined) {
+      return;
     }
+    cancelAnimationFrame(this.PhysicsAnimationFrameId);
+    this.PhysicsAnimationFrameId = undefined;
+  }
+  DestroyPhysics() {
+    this.StartPhysics();
     this.RemoveLayer('PhysicsDebugLayer');
     this.World.free();
   }
