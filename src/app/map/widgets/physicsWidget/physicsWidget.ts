@@ -20,6 +20,11 @@ export default class PhysicsWidget extends BaseWidget<PhysicsWidgetOptions> {
   Options = {
     Id: 'PhysicsWidget',
   };
+  private readonly PhysicsTimeStep = 1 / 60;
+
+  private LastPhysicsTime = performance.now();
+
+  private PhysicsAccumulator = 0;
   private PhysicsAnimationFrameId: number | undefined = undefined;
   World!: World;
   override InitWidget() {
@@ -78,9 +83,16 @@ export default class PhysicsWidget extends BaseWidget<PhysicsWidgetOptions> {
     if (this.PhysicsAnimationFrameId !== undefined) {
       return;
     }
-    const Step = () => {
-      this.World.step();
-
+    this.World.timestep = this.PhysicsTimeStep;
+    this.LastPhysicsTime = performance.now();
+    const Step = (CurrentTime: number) => {
+      const DeltaTime = (CurrentTime - this.LastPhysicsTime) / 1000;
+      this.LastPhysicsTime = CurrentTime;
+      this.PhysicsAccumulator += DeltaTime;
+      while (this.PhysicsAccumulator >= this.PhysicsTimeStep) {
+        this.World.step();
+        this.PhysicsAccumulator -= this.PhysicsTimeStep;
+      }
       this.UpdateLayer(new PhysicsDebugLayer(this.World, [0, 0, 0]));
       this.PhysicsAnimationFrameId = requestAnimationFrame(Step);
     };
