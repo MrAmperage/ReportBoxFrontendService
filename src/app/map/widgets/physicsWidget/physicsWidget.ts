@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import BaseWidget from '../baseWidget/baseWidget';
 import { PhysicsWidgetOptions } from './physicsWidgetTypes';
-import { init, World } from '@dimforge/rapier3d-compat';
+import { World } from '@dimforge/rapier3d-compat';
 
 @Component({
   selector: 'PhysicsWidget',
@@ -13,20 +13,22 @@ export default class PhysicsWidget extends BaseWidget<PhysicsWidgetOptions> {
     Id: 'PhysicsWidget',
   };
   World!: World;
-  override InitWidget(): void {
+  override InitWidget() {
     super.InitWidget();
-    init().then(() => {
-      this.InitPhysics();
-    });
+
+    this.InitPhysics();
   }
 
-  InitPhysics() {
-    this.World = new World({
+  async InitPhysics() {
+    const Rapier = await import('@dimforge/rapier3d-compat');
+    await Rapier.init();
+    this.World = new Rapier.World({
       x: 0,
       y: 0,
       z: -9.81,
     });
   }
+
   override DestroyWidget(): void {
     this.DestroyPhysics();
     super.DestroyWidget();
