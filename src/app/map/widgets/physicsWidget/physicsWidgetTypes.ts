@@ -1,2 +1,2 @@
 import { World } from '@dimforge/rapier3d';
-export type PhysicsWidgetOptions = { Id: string; World: World };
+export type PhysicsWidgetOptions = { Id: string };

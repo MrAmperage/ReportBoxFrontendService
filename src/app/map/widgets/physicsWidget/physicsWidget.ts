@@ -9,12 +9,12 @@ import { World } from '@dimforge/rapier3d';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class PhysicsWidget extends BaseWidget<PhysicsWidgetOptions> {
+  World = new World({
+    x: 0,
+    y: 0,
+    z: -9.81,
+  });
   Options = {
     Id: 'physicsWidget',
-    World: new World({
-      x: 0,
-      y: 0,
-      z: -9.81,
-    }),
   };
 }
