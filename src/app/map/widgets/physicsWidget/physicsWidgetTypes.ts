@@ -5,14 +5,15 @@ export type PhysicsWidgetApi = {
   RemoveCollider(Id: ColliderHandle): void;
   AddRigidBody(Description: PhysicsRigidBodyDescription): RigidBodyHandle;
   RemoveRigidBody(Id: RigidBodyHandle): void;
+  ChangeEnablePhysics(IsEnable: boolean): void;
 };
 
-export type PhysicsWidgetOptions = { Id: string };
+export type PhysicsWidgetOptions = { Id: string; IsEnablePhysics: boolean };
 export type PhysicsRigidBodyDescription = {
   Type: 'Fixed' | 'Dynamic' | 'KinematicPosition' | 'KinematicVelocity';
-
   Position?: [number, number, number];
 };
+
 type PhysicsColliderBaseDescription = {
   Position?: [number, number, number];
   Friction?: number;
