@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import BaseWidget from '../baseWidget/baseWidget';
 import { PhysicsWidgetOptions } from './physicsWidgetTypes';
+import { World } from '@dimforge/rapier3d';
 
 @Component({
   selector: 'PhysicsWidget',
@@ -8,5 +9,12 @@ import { PhysicsWidgetOptions } from './physicsWidgetTypes';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class PhysicsWidget extends BaseWidget<PhysicsWidgetOptions> {
-  Options = { Id: 'physicsWidget' };
+  Options = {
+    Id: 'physicsWidget',
+    World: new World({
+      x: 0,
+      y: 0,
+      z: -9.81,
+    }),
+  };
 }
