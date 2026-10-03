@@ -1,4 +1,4 @@
-import { Widget } from 'deck.gl';
+import { Layer, Widget } from 'deck.gl';
 import DeckGlService from '../../deckglService/deckglService';
 import {
   OnInit,
@@ -60,6 +60,17 @@ export default abstract class BaseWidget<Options extends BaseWidgetOptions>
     Id: string,
   ): BaseWidgetKey<OptionsType> {
     return Id as BaseWidgetKey<OptionsType>;
+  }
+  protected AddLayer(Layer: Layer): void {
+    this.DeckGlService.AddLayer(Layer);
+  }
+
+  protected UpdateLayer(Layer: Layer): void {
+    this.DeckGlService.UpdateLayer(Layer);
+  }
+
+  protected RemoveLayer(Id: string): void {
+    this.DeckGlService.RemoveLayer(Id);
   }
 
   DestroyWidget() {
