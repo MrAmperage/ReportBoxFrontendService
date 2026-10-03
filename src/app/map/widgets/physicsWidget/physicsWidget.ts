@@ -37,10 +37,7 @@ export default class PhysicsWidget extends BaseWidget<PhysicsWidgetOptions> {
   private Rapier!: typeof import('@dimforge/rapier3d-compat');
 
   override InitWidget(): void {
-    if (this.Options.IsEnablePhysics) {
-      this.InitPhysics();
-    }
-
+    this.InitPhysics();
     super.InitWidget();
   }
 
@@ -56,8 +53,9 @@ export default class PhysicsWidget extends BaseWidget<PhysicsWidgetOptions> {
     });
 
     this.AddLayer(new PhysicsDebugLayer(this.World, [0, 0, 0]));
-
-    this.StartPhysics();
+    if (this.Options.IsEnablePhysics) {
+      this.StartPhysics();
+    }
   }
 
   override DestroyWidget(): void {
@@ -186,17 +184,13 @@ export default class PhysicsWidget extends BaseWidget<PhysicsWidgetOptions> {
     if (this.PhysicsAnimationFrameId === undefined) {
       return;
     }
-
     cancelAnimationFrame(this.PhysicsAnimationFrameId);
-
     this.PhysicsAnimationFrameId = undefined;
   }
 
   DestroyPhysics(): void {
     this.StopPhysics();
-
     this.RemoveLayer('PhysicsDebugLayer');
-
     this.World.free();
   }
 
