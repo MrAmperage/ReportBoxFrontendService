@@ -198,29 +198,26 @@ export default class PhysicsWidget extends BaseWidget<PhysicsWidgetOptions> {
     if (this.PhysicsAnimationFrameId !== undefined) {
       return;
     }
-
     this.World.timestep = this.PhysicsTimeStep;
-
     this.LastPhysicsTime = performance.now();
-
+    this.PhysicsAccumulator = 0;
+    const MaxStepsPerFrame = 5;
     const Step = (CurrentTime: number) => {
       const DeltaTime = (CurrentTime - this.LastPhysicsTime) / 1000;
-
       this.LastPhysicsTime = CurrentTime;
-
       this.PhysicsAccumulator += DeltaTime;
-
-      while (this.PhysicsAccumulator >= this.PhysicsTimeStep) {
+      let Steps = 0;
+      while (this.PhysicsAccumulator >= this.PhysicsTimeStep && Steps < MaxStepsPerFrame) {
         this.World.step();
-
         this.PhysicsAccumulator -= this.PhysicsTimeStep;
+        Steps++;
       }
-
+      if (Steps === MaxStepsPerFrame) {
+        this.PhysicsAccumulator %= this.PhysicsTimeStep;
+      }
       this.UpdateLayer(new PhysicsDebugLayer(this.World, [0, 0, 0]));
-
       this.PhysicsAnimationFrameId = requestAnimationFrame(Step);
     };
-
     this.PhysicsAnimationFrameId = requestAnimationFrame(Step);
   }
 }
