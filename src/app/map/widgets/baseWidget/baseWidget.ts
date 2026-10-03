@@ -13,7 +13,7 @@ import { BaseWidgetKey, BaseWidgetOptions, WidgetPlacement } from './baseWidgetT
 @Directive({
   selector: 'BaseWidget',
 })
-export default abstract class BaseWidget<Options extends BaseWidgetOptions>
+export default abstract class BaseWidget<OptionsType extends BaseWidgetOptions>
   extends Widget
   implements OnInit, OnDestroy
 {
@@ -25,7 +25,7 @@ export default abstract class BaseWidget<Options extends BaseWidgetOptions>
     super({});
   }
 
-  abstract Options: Options;
+  abstract Options: OptionsType;
   override className: string = '';
   override placement: WidgetPlacement = 'top-left';
   @HostBinding('class.Widget')
@@ -50,7 +50,7 @@ export default abstract class BaseWidget<Options extends BaseWidgetOptions>
   GetOptionsByKey(Key: BaseWidgetKey<BaseWidgetOptions>) {
     return this.DeckGlService.GetOptions(Key);
   }
-  UpdateOptions(NewOptions: Partial<Omit<Options, 'Id'>>) {
+  UpdateOptions(NewOptions: Partial<Omit<OptionsType, 'Id'>>) {
     this.DeckGlService.UpdateOptions(this.Options.Id, NewOptions);
     this.ChangeDetectorRef.detectChanges();
   }
