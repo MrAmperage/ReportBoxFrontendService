@@ -14,13 +14,25 @@ export default class PhysicsWidget extends BaseWidget<PhysicsWidgetOptions> {
   };
   World!: World;
   override InitWidget(): void {
+    super.InitWidget();
     init().then(() => {
-      this.World = new World({
-        x: 0,
-        y: 0,
-        z: -9.81,
-      });
-      super.InitWidget();
+      this.InitPhysics();
     });
+  }
+
+  InitPhysics() {
+    this.World = new World({
+      x: 0,
+      y: 0,
+      z: -9.81,
+    });
+  }
+  override DestroyWidget(): void {
+    this.DestroyPhysics();
+    super.DestroyWidget();
+  }
+
+  DestroyPhysics() {
+    this.World.free();
   }
 }
