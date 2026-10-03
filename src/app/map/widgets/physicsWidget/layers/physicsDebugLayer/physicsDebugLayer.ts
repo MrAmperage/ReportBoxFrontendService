@@ -21,25 +21,20 @@ export default class PhysicsDebugLayer extends LineLayer<PhysicsDebugLine> {
 
   static GenerateLines(DebugBuffers: DebugRenderBuffers): PhysicsDebugLine[] {
     const Lines: PhysicsDebugLine[] = [];
-
     for (let Index = 0; Index < DebugBuffers.vertices.length; Index += 6) {
       const LineIndex = Index / 6;
-
       const ColorIndex = LineIndex * 8;
-
       Lines.push({
         Source: [
           DebugBuffers.vertices[Index],
           DebugBuffers.vertices[Index + 1],
           DebugBuffers.vertices[Index + 2],
         ],
-
         Target: [
           DebugBuffers.vertices[Index + 3],
           DebugBuffers.vertices[Index + 4],
           DebugBuffers.vertices[Index + 5],
         ],
-
         Color: [
           DebugBuffers.colors[ColorIndex] * 255,
           DebugBuffers.colors[ColorIndex + 1] * 255,

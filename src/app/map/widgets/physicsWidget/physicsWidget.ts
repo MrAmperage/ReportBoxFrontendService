@@ -28,9 +28,7 @@ export default class PhysicsWidget extends BaseWidget<PhysicsWidgetOptions> {
       y: 0,
       z: -9.81,
     });
-    this.AddLayer(new PhysicsDebugLayer(this.World, [0, 0, 0]));
-
-    this.AddCollider(Rapier.ColliderDesc.cuboid(10, 10, 2).setTranslation(0, 0, 2));
+    this.StartPhysics();
   }
 
   override DestroyWidget(): void {
@@ -54,5 +52,14 @@ export default class PhysicsWidget extends BaseWidget<PhysicsWidgetOptions> {
   DestroyPhysics() {
     this.RemoveLayer('PhysicsDebugLayer');
     this.World.free();
+  }
+
+  StartPhysics(): void {
+    const Step = () => {
+      this.World.step();
+      this.UpdateLayer(new PhysicsDebugLayer(this.World, [0, 0, 0]));
+      requestAnimationFrame(Step);
+    };
+    requestAnimationFrame(Step);
   }
 }
