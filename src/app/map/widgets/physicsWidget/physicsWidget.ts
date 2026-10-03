@@ -29,6 +29,8 @@ export default class PhysicsWidget extends BaseWidget<PhysicsWidgetOptions> {
       z: -9.81,
     });
     this.AddLayer(new PhysicsDebugLayer(this.World, [0, 0, 0]));
+
+    this.AddCollider(Rapier.ColliderDesc.cuboid(10, 10, 2).setTranslation(0, 0, 2));
   }
 
   override DestroyWidget(): void {
@@ -38,9 +40,7 @@ export default class PhysicsWidget extends BaseWidget<PhysicsWidgetOptions> {
   @ExportApi()
   AddCollider(ColliderDescription: ColliderDesc, Parent?: RigidBody): Collider {
     const Collider = this.World.createCollider(ColliderDescription, Parent);
-
     this.UpdateLayer(new PhysicsDebugLayer(this.World, [0, 0, 0]));
-
     return Collider;
   }
 
