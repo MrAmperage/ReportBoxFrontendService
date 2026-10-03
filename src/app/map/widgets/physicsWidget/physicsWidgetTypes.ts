@@ -6,3 +6,5 @@ export type PhysicsWidgetApi = {
   AddRigidBody(RigidBodyDescription: RigidBodyDesc): RigidBody;
   RemoveRigidBody(RigidBody: RigidBody): void;
 };
+
+export type PhysicsWidgetOptions = { Id: string };
