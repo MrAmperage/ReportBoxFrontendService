@@ -3,6 +3,7 @@ import BaseWidget from '../baseWidget/baseWidget';
 import { PhysicsWidgetOptions } from './physicsWidgetTypes';
 import { Collider, ColliderDesc, RigidBody, World } from '@dimforge/rapier3d-compat';
 import ExportApi from '../baseWidget/ExportApiDecorator';
+import PhysicsDebugLayer from './layers/physicsDebugLayer/physicsDebugLayer';
 
 @Component({
   selector: 'PhysicsWidget',
@@ -27,6 +28,7 @@ export default class PhysicsWidget extends BaseWidget<PhysicsWidgetOptions> {
       y: 0,
       z: -9.81,
     });
+    this.AddLayer(new PhysicsDebugLayer(this.World, [0, 0, 0]));
   }
 
   override DestroyWidget(): void {
