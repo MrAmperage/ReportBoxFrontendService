@@ -37,14 +37,22 @@ export default class PhysicsWidget extends BaseWidget<PhysicsWidgetOptions> {
   }
   @ExportApi()
   AddCollider(ColliderDescription: ColliderDesc, Parent?: RigidBody): Collider {
-    return this.World.createCollider(ColliderDescription, Parent);
+    const Collider = this.World.createCollider(ColliderDescription, Parent);
+
+    this.UpdateLayer(new PhysicsDebugLayer(this.World, [0, 0, 0]));
+
+    return Collider;
   }
 
   @ExportApi()
-  RemoveCollider(Collider: Collider, WakeUp: boolean = true) {
+  RemoveCollider(Collider: Collider, WakeUp: boolean = true): void {
     this.World.removeCollider(Collider, WakeUp);
+
+    this.UpdateLayer(new PhysicsDebugLayer(this.World, [0, 0, 0]));
   }
+
   DestroyPhysics() {
+    this.RemoveLayer('PhysicsDebugLayer');
     this.World.free();
   }
 }
