@@ -69,7 +69,7 @@ export default class PhysicsWidget extends BaseWidget<PhysicsWidgetOptions> {
     this.PhysicsAnimationFrameId = undefined;
   }
   DestroyPhysics() {
-    this.StartPhysics();
+    this.StopPhysics();
     this.RemoveLayer('PhysicsDebugLayer');
     this.World.free();
   }
