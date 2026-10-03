@@ -1,12 +1,13 @@
 import type { DebugRenderBuffers, World } from '@dimforge/rapier3d-compat';
 import { LineLayer } from 'deck.gl';
+import { PhysicsDebugLine } from './physicsDebugLayerTypes';
 
-export default class PhisicsDebugLayer extends LineLayer<PhysicsDebugLine> {
+export default class PhysicsDebugLayer extends LineLayer<PhysicsDebugLine> {
   constructor(World: World, CoordinateOrigin: [number, number, number]) {
     const DebugBuffers = World.debugRender();
     super({
       id: 'PhysicsDebugLayer',
-      data: PhisicsDebugLayer.GenerateLines(DebugBuffers),
+      data: PhysicsDebugLayer.GenerateLines(DebugBuffers),
       coordinateSystem: 'meter-offsets',
       coordinateOrigin: CoordinateOrigin,
       getSourcePosition: (Line) => Line.Source,
