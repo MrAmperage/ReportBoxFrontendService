@@ -61,7 +61,11 @@ export default abstract class BaseWidget<Options extends BaseWidgetOptions>
   ): BaseWidgetKey<OptionsType> {
     return Id as BaseWidgetKey<OptionsType>;
   }
-  ngOnDestroy(): void {
+
+  DestroyWidget() {
     this.DeckGlService.UnregisterWidget(this.Options.Id);
+  }
+  ngOnDestroy(): void {
+    this.DestroyWidget();
   }
 }
