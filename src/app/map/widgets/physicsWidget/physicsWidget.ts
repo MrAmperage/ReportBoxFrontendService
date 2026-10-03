@@ -34,9 +34,10 @@ export default class PhysicsWidget extends BaseWidget<PhysicsWidgetOptions> {
   private PhysicsAnimationFrameId: number | undefined = undefined;
   private World!: World;
   private Rapier!: typeof import('@dimforge/rapier3d-compat');
+
   override InitWidget(): void {
-    super.InitWidget();
     this.InitPhysics();
+    super.InitWidget();
   }
 
   async InitPhysics(): Promise<void> {
