@@ -1,10 +1,36 @@
-import type { Collider, ColliderDesc, RigidBody, RigidBodyDesc } from '@dimforge/rapier3d-compat';
+import type { ColliderHandle, RigidBodyHandle } from '@dimforge/rapier3d-compat';
 
 export type PhysicsWidgetApi = {
-  AddCollider(ColliderDescription: ColliderDesc, Parent?: RigidBody): Collider;
-  RemoveCollider(Collider: Collider, WakeUp?: boolean): void;
-  AddRigidBody(RigidBodyDescription: RigidBodyDesc): RigidBody;
-  RemoveRigidBody(RigidBody: RigidBody): void;
+  AddCollider(Description: PhysicsColliderDescription, ParentId?: RigidBodyHandle): ColliderHandle;
+  RemoveCollider(Id: ColliderHandle): void;
+  AddRigidBody(Description: PhysicsRigidBodyDescription): RigidBodyHandle;
+  RemoveRigidBody(Id: RigidBodyHandle): void;
 };
 
 export type PhysicsWidgetOptions = { Id: string };
+export type PhysicsRigidBodyDescription = {
+  Type: 'Fixed' | 'Dynamic' | 'KinematicPosition' | 'KinematicVelocity';
+
+  Position?: [number, number, number];
+};
+type PhysicsColliderBaseDescription = {
+  Position?: [number, number, number];
+  Friction?: number;
+  Restitution?: number;
+  IsSensor?: boolean;
+};
+
+export type PhysicsColliderDescription =
+  | (PhysicsColliderBaseDescription & {
+      Type: 'Cuboid';
+      HalfExtents: [number, number, number];
+    })
+  | (PhysicsColliderBaseDescription & {
+      Type: 'Ball';
+      Radius: number;
+    })
+  | (PhysicsColliderBaseDescription & {
+      Type: 'Trimesh';
+      Vertices: Float32Array;
+      Indices: Uint32Array;
+    });
