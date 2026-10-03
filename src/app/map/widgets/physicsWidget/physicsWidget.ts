@@ -20,6 +20,7 @@ export default class PhysicsWidget extends BaseWidget<PhysicsWidgetOptions> {
   Options = {
     Id: 'PhysicsWidget',
   };
+  private PhysicsAnimationFrameId: number | undefined = undefined;
   World!: World;
   override InitWidget() {
     super.InitWidget();
@@ -62,16 +63,24 @@ export default class PhysicsWidget extends BaseWidget<PhysicsWidgetOptions> {
   }
 
   DestroyPhysics() {
+    if (this.PhysicsAnimationFrameId !== undefined) {
+      cancelAnimationFrame(this.PhysicsAnimationFrameId);
+      this.PhysicsAnimationFrameId = undefined;
+    }
     this.RemoveLayer('PhysicsDebugLayer');
     this.World.free();
   }
 
   StartPhysics(): void {
+    if (this.PhysicsAnimationFrameId !== undefined) {
+      return;
+    }
     const Step = () => {
       this.World.step();
+
       this.UpdateLayer(new PhysicsDebugLayer(this.World, [0, 0, 0]));
-      requestAnimationFrame(Step);
+      this.PhysicsAnimationFrameId = requestAnimationFrame(Step);
     };
-    requestAnimationFrame(Step);
+    this.PhysicsAnimationFrameId = requestAnimationFrame(Step);
   }
 }
