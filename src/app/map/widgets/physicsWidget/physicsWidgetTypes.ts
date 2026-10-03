@@ -7,7 +7,7 @@ export type PhysicsWidgetApi = {
   RemoveRigidBody(Id: RigidBodyHandle): void;
 };
 
-export type PhysicsWidgetOptions = { Id: string };
+export type PhysicsWidgetOptions = { Id: string; IsEnablePhysics: boolean };
 export type PhysicsRigidBodyDescription = {
   Type: 'Fixed' | 'Dynamic' | 'KinematicPosition' | 'KinematicVelocity';
 

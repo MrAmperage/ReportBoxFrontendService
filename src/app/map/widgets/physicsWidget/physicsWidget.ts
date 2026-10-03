@@ -25,6 +25,7 @@ import {
 })
 export default class PhysicsWidget extends BaseWidget<PhysicsWidgetOptions> {
   Options = {
+    IsEnablePhysics: true,
     Id: 'PhysicsWidget',
   };
   private readonly MaxStepsPerFrame = 5;
@@ -36,7 +37,10 @@ export default class PhysicsWidget extends BaseWidget<PhysicsWidgetOptions> {
   private Rapier!: typeof import('@dimforge/rapier3d-compat');
 
   override InitWidget(): void {
-    this.InitPhysics();
+    if (this.Options.IsEnablePhysics) {
+      this.InitPhysics();
+    }
+
     super.InitWidget();
   }
 
@@ -58,10 +62,18 @@ export default class PhysicsWidget extends BaseWidget<PhysicsWidgetOptions> {
 
   override DestroyWidget(): void {
     this.DestroyPhysics();
-
     super.DestroyWidget();
   }
 
+  @ExportApi()
+  ChangeEnablePhysics(IsEnable: boolean) {
+    this.UpdateOptions({ IsEnablePhysics: IsEnable });
+    if (this.Options.IsEnablePhysics) {
+      this.StartPhysics();
+    } else {
+      this.StopPhysics();
+    }
+  }
   @ExportApi()
   AddCollider(Description: PhysicsColliderDescription, ParentId?: RigidBodyHandle): ColliderHandle {
     const Parent = ParentId === undefined ? undefined : this.World.getRigidBody(ParentId);

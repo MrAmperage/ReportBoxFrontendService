@@ -50,7 +50,7 @@ export default abstract class BaseWidget<Options extends BaseWidgetOptions>
   GetOptionsByKey(Key: BaseWidgetKey<BaseWidgetOptions>) {
     return this.DeckGlService.GetOptions(Key);
   }
-  UpdateOptions(NewOptions: Partial<Omit<BaseWidgetOptions, 'Id'>>) {
+  UpdateOptions(NewOptions: Partial<Omit<Options, 'Id'>>) {
     this.DeckGlService.UpdateOptions(this.Options.Id, NewOptions);
     this.ChangeDetectorRef.detectChanges();
   }
