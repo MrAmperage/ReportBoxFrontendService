@@ -44,9 +44,7 @@ export default class PhysicsWidget extends BaseWidget<PhysicsWidgetOptions> {
   }
   @ExportApi()
   AddCollider(ColliderDescription: ColliderDesc, Parent?: RigidBody): Collider {
-    const Collider = this.World.createCollider(ColliderDescription, Parent);
-    this.UpdateLayer(new PhysicsDebugLayer(this.World, [0, 0, 0]));
-    return Collider;
+    return this.World.createCollider(ColliderDescription, Parent);
   }
   @ExportApi()
   AddRigidBody(RigidBodyDescription: RigidBodyDesc): RigidBody {
@@ -56,14 +54,11 @@ export default class PhysicsWidget extends BaseWidget<PhysicsWidgetOptions> {
   @ExportApi()
   RemoveRigidBody(RigidBody: RigidBody): void {
     this.World.removeRigidBody(RigidBody);
-
-    this.UpdateLayer(new PhysicsDebugLayer(this.World, [0, 0, 0]));
   }
 
   @ExportApi()
   RemoveCollider(Collider: Collider, WakeUp: boolean = true): void {
     this.World.removeCollider(Collider, WakeUp);
-    this.UpdateLayer(new PhysicsDebugLayer(this.World, [0, 0, 0]));
   }
 
   DestroyPhysics() {
