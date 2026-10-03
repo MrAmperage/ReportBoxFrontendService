@@ -1,16 +1,28 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 
+
 import type {
   ColliderDesc,
   ColliderHandle,
+  ColliderHandle,
   RigidBodyDesc,
+  RigidBodyHandle,
+  World,
   RigidBodyHandle,
   World,
 } from '@dimforge/rapier3d-compat';
 
 import BaseWidget from '../baseWidget/baseWidget';
+
+import BaseWidget from '../baseWidget/baseWidget';
 import ExportApi from '../baseWidget/ExportApiDecorator';
 import PhysicsDebugLayer from './layers/physicsDebugLayer/physicsDebugLayer';
+
+import {
+  PhysicsColliderDescription,
+  PhysicsRigidBodyDescription,
+  PhysicsWidgetOptions,
+} from './physicsWidgetTypes';
 
 import {
   PhysicsColliderDescription,
@@ -32,6 +44,10 @@ export default class PhysicsWidget extends BaseWidget<PhysicsWidgetOptions> {
   private readonly PhysicsTimeStep = 1 / 60;
   private LastPhysicsTime = performance.now();
   private PhysicsAccumulator = 0;
+  private readonly MaxStepsPerFrame = 5;
+  private readonly PhysicsTimeStep = 1 / 60;
+  private LastPhysicsTime = performance.now();
+  private PhysicsAccumulator = 0;
   private PhysicsAnimationFrameId: number | undefined = undefined;
   private World!: World;
   private Rapier!: typeof import('@dimforge/rapier3d-compat');
@@ -47,10 +63,17 @@ export default class PhysicsWidget extends BaseWidget<PhysicsWidgetOptions> {
     await this.Rapier.init();
 
     this.World = new this.Rapier.World({
+  async InitPhysics(): Promise<void> {
+    this.Rapier = await import('@dimforge/rapier3d-compat');
+
+    await this.Rapier.init();
+
+    this.World = new this.Rapier.World({
       x: 0,
       y: 0,
       z: -9.81,
     });
+
 
     this.AddLayer(new PhysicsDebugLayer(this.World, [0, 0, 0]));
     if (this.Options.IsEnablePhysics) {
@@ -60,6 +83,7 @@ export default class PhysicsWidget extends BaseWidget<PhysicsWidgetOptions> {
 
   override DestroyWidget(): void {
     this.DestroyPhysics();
+
     super.DestroyWidget();
   }
 
@@ -72,6 +96,7 @@ export default class PhysicsWidget extends BaseWidget<PhysicsWidgetOptions> {
       this.StopPhysics();
     }
   }
+
   @ExportApi()
   AddCollider(Description: PhysicsColliderDescription, ParentId?: RigidBodyHandle): ColliderHandle {
     const Parent = ParentId === undefined ? undefined : this.World.getRigidBody(ParentId);
@@ -105,6 +130,11 @@ export default class PhysicsWidget extends BaseWidget<PhysicsWidgetOptions> {
   }
 
   @ExportApi()
+  RemoveRigidBody(Id: RigidBodyHandle): void {
+    const RigidBody = this.World.getRigidBody(Id);
+    if (RigidBody == null) {
+      return;
+    }
   RemoveRigidBody(Id: RigidBodyHandle): void {
     const RigidBody = this.World.getRigidBody(Id);
     if (RigidBody == null) {
@@ -180,17 +210,90 @@ export default class PhysicsWidget extends BaseWidget<PhysicsWidgetOptions> {
     return RigidBodyDescription;
   }
 
+  private CreateColliderDescription(Description: PhysicsColliderDescription): ColliderDesc {
+    let ColliderDescription: ColliderDesc;
+
+    switch (Description.Type) {
+      case 'Cuboid':
+        ColliderDescription = this.Rapier.ColliderDesc.cuboid(...Description.HalfExtents);
+        break;
+
+      case 'Ball':
+        ColliderDescription = this.Rapier.ColliderDesc.ball(Description.Radius);
+        break;
+
+      case 'Trimesh':
+        ColliderDescription = this.Rapier.ColliderDesc.trimesh(
+          Description.Vertices,
+          Description.Indices,
+        );
+        break;
+    }
+
+    if (Description.Position !== undefined) {
+      ColliderDescription.setTranslation(...Description.Position);
+    }
+
+    if (Description.Friction !== undefined) {
+      ColliderDescription.setFriction(Description.Friction);
+    }
+
+    if (Description.Restitution !== undefined) {
+      ColliderDescription.setRestitution(Description.Restitution);
+    }
+
+    if (Description.IsSensor !== undefined) {
+      ColliderDescription.setSensor(Description.IsSensor);
+    }
+
+    return ColliderDescription;
+  }
+
+  private CreateRigidBodyDescription(Description: PhysicsRigidBodyDescription): RigidBodyDesc {
+    let RigidBodyDescription: RigidBodyDesc;
+
+    switch (Description.Type) {
+      case 'Fixed':
+        RigidBodyDescription = this.Rapier.RigidBodyDesc.fixed();
+        break;
+
+      case 'Dynamic':
+        RigidBodyDescription = this.Rapier.RigidBodyDesc.dynamic();
+        break;
+
+      case 'KinematicPosition':
+        RigidBodyDescription = this.Rapier.RigidBodyDesc.kinematicPositionBased();
+        break;
+
+      case 'KinematicVelocity':
+        RigidBodyDescription = this.Rapier.RigidBodyDesc.kinematicVelocityBased();
+        break;
+    }
+
+    if (Description.Position !== undefined) {
+      RigidBodyDescription.setTranslation(...Description.Position);
+    }
+
+    return RigidBodyDescription;
+  }
+
   StopPhysics(): void {
     if (this.PhysicsAnimationFrameId === undefined) {
       return;
     }
+
     cancelAnimationFrame(this.PhysicsAnimationFrameId);
+
     this.PhysicsAnimationFrameId = undefined;
   }
 
   DestroyPhysics(): void {
+
+  DestroyPhysics(): void {
     this.StopPhysics();
+
     this.RemoveLayer('PhysicsDebugLayer');
+
     this.World.free();
   }
 
@@ -198,6 +301,22 @@ export default class PhysicsWidget extends BaseWidget<PhysicsWidgetOptions> {
     if (this.PhysicsAnimationFrameId !== undefined) {
       return;
     }
+    this.World.timestep = this.PhysicsTimeStep;
+    this.LastPhysicsTime = performance.now();
+    this.PhysicsAccumulator = 0;
+    const Step = (CurrentTime: number) => {
+      const DeltaTime = (CurrentTime - this.LastPhysicsTime) / 1000;
+      this.LastPhysicsTime = CurrentTime;
+      this.PhysicsAccumulator += DeltaTime;
+      let Steps = 0;
+      while (this.PhysicsAccumulator >= this.PhysicsTimeStep && Steps < this.MaxStepsPerFrame) {
+        this.World.step();
+        this.PhysicsAccumulator -= this.PhysicsTimeStep;
+        Steps++;
+      }
+      if (Steps === this.MaxStepsPerFrame) {
+        this.PhysicsAccumulator %= this.PhysicsTimeStep;
+      }
     this.World.timestep = this.PhysicsTimeStep;
     this.LastPhysicsTime = performance.now();
     this.PhysicsAccumulator = 0;

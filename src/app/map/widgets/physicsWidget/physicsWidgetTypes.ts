@@ -1,4 +1,5 @@
 import type { ColliderHandle, RigidBodyHandle } from '@dimforge/rapier3d-compat';
+import type { ColliderHandle, RigidBodyHandle } from '@dimforge/rapier3d-compat';
 
 export type PhysicsWidgetApi = {
   AddCollider(Description: PhysicsColliderDescription, ParentId?: RigidBodyHandle): ColliderHandle;
