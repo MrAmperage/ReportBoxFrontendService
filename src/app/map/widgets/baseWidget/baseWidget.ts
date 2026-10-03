@@ -24,7 +24,7 @@ export default abstract class BaseWidget<Options extends BaseWidgetOptions>
   ) {
     super({});
   }
-
+  ApiExport: string[] = [];
   abstract Options: Options;
   override className: string = '';
   override placement: WidgetPlacement = 'top-left';

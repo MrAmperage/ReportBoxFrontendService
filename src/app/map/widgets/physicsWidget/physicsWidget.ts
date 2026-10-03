@@ -15,7 +15,6 @@ export default class PhysicsWidget extends BaseWidget<PhysicsWidgetOptions> {
   World!: World;
   override InitWidget() {
     super.InitWidget();
-
     this.InitPhysics();
   }
 
