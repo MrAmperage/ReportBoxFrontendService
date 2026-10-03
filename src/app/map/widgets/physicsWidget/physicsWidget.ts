@@ -34,6 +34,7 @@ export default class PhysicsWidget extends BaseWidget<PhysicsWidgetOptions> {
       y: 0,
       z: -9.81,
     });
+    this.AddLayer(new PhysicsDebugLayer(this.World, [0, 0, 0]));
     this.StartPhysics();
   }
 
