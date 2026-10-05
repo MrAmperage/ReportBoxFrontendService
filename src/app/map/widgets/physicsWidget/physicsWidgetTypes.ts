@@ -9,7 +9,7 @@ export type PhysicsWidgetApi = {
   RemoveRigidBody(Id: RigidBodyHandle): void;
   ChangeEnablePhysics(IsEnable: boolean): void;
 };
-const PhysicsWidgetKey = BaseWidget.CreateWidgetKey<
+export const PhysicsWidgetKey = BaseWidget.CreateWidgetKey<
   WidgetApi<PhysicsWidgetApi> & PhysicsWidgetOptions
 >('PhysicsWidget');
 

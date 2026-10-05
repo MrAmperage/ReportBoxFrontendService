@@ -83,13 +83,24 @@ export default class DeckGlService {
     }
   }
 
-  GetOptions<OptionsType extends BaseWidgetOptions>(
+  GetObservableOptions<OptionsType extends BaseWidgetOptions>(
     Key: BaseWidgetKey<OptionsType>,
-  ): Observable<OptionsType> {
+  ): Observable<OptionsType> | undefined {
     const Option = this.WidgetOptionsMap.get(Key);
     if (Option === undefined) {
-      throw new Error(`Виджет ${Key} не зарегистрирован`);
+      return undefined;
     }
     return Option as unknown as BehaviorSubject<OptionsType>;
+  }
+  GetOptions<OptionsType extends BaseWidgetOptions>(
+    Key: BaseWidgetKey<OptionsType>,
+  ): OptionsType | undefined {
+    const Subject = this.WidgetOptionsMap.get(Key);
+
+    if (Subject === undefined) {
+      return undefined;
+    } else {
+      return Subject.getValue() as OptionsType;
+    }
   }
 }

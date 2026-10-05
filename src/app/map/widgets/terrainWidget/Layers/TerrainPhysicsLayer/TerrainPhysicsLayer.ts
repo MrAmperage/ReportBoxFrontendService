@@ -1,7 +1,9 @@
 import { TerrainLayer } from 'deck.gl';
+import { PhysicsWidgetApi } from '../../../physicsWidget/physicsWidgetTypes';
 
 export default class TerrainPhysicsLayer extends TerrainLayer {
-  constructor() {
+  constructor(PhysicsWidgetApi: PhysicsWidgetApi) {
+    console.log(PhysicsWidgetApi);
     super({
       id: 'TerrainPhysicsLayer',
       elevationData: 'https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png',
