@@ -1,3 +1,6 @@
+import BaseWidget from './baseWidget';
+import { BaseWidgetOptions } from './baseWidgetTypes';
+
 const ApiExportKey = Symbol('ApiExport');
 
 export default function ExportApi() {
@@ -23,6 +26,20 @@ export default function ExportApi() {
   };
 }
 
-export function GetExportApiMethods(Target: object): readonly (string | symbol)[] {
-  return (Target as any)[ApiExportKey] ?? [];
+export function InitExportApi(Widget: BaseWidget<BaseWidgetOptions>): void {
+  const ApiExport: readonly (string | symbol)[] = (Widget as any)[ApiExportKey] ?? [];
+
+  const Api: Record<string, (...Args: any[]) => any> = {};
+
+  for (const MethodName of ApiExport) {
+    const Method = (Widget as any)[MethodName];
+
+    if (typeof Method !== 'function') {
+      continue;
+    }
+
+    Api[MethodName.toString()] = Method.bind(Widget);
+  }
+
+  (Widget.Options as any).Api = Api;
 }
