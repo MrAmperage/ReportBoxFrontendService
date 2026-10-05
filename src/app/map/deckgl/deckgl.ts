@@ -28,7 +28,7 @@ export default class DeckGl implements OnInit {
     this.Deck = this.DeckGlService.SetDeck(
       new Deck({
         parent: this.Container.nativeElement,
-        viewState: this.ViewState,
+        initialViewState: this.ViewState,
         controller: true,
       }),
     );

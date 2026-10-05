@@ -13,5 +13,6 @@ export default class TerrainWidget extends BaseWidget<TerrainWidgetOptions> {
 
   override InitWidget(): void {
     this.AddLayer(new TerrainPhysicsLayer());
+    super.InitWidget();
   }
 }
