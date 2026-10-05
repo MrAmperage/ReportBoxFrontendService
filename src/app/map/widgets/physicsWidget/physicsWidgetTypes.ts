@@ -1,4 +1,6 @@
 import type { ColliderHandle, RigidBodyHandle } from '@dimforge/rapier3d-compat';
+import BaseWidget from '../baseWidget/baseWidget';
+import { WidgetApi } from '../baseWidget/baseWidgetTypes';
 
 export type PhysicsWidgetApi = {
   AddCollider(Description: PhysicsColliderDescription, ParentId?: RigidBodyHandle): ColliderHandle;
@@ -7,6 +9,9 @@ export type PhysicsWidgetApi = {
   RemoveRigidBody(Id: RigidBodyHandle): void;
   ChangeEnablePhysics(IsEnable: boolean): void;
 };
+const PhysicsWidgetKey = BaseWidget.CreateWidgetKey<
+  WidgetApi<PhysicsWidgetApi> & PhysicsWidgetOptions
+>('PhysicsWidget');
 
 export type PhysicsWidgetOptions = { Id: string; IsEnablePhysics: boolean };
 export type PhysicsRigidBodyDescription = {

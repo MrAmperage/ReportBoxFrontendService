@@ -7,3 +7,7 @@ declare const WidgetOptionsType: unique symbol;
 export type BaseWidgetKey<OptionsType extends BaseWidgetOptions> = string & {
   readonly [WidgetOptionsType]: OptionsType;
 };
+
+export type WidgetApi<ApiType> = {
+  Api: ApiType;
+};
