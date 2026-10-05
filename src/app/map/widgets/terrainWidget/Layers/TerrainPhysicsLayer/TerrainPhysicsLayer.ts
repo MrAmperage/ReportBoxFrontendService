@@ -2,6 +2,14 @@ import { TerrainLayer } from 'deck.gl';
 
 export default class TerrainPhysicsLayer extends TerrainLayer {
   constructor() {
-    super();
+    super({
+      elevationData: 'https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png',
+      elevationDecoder: {
+        rScaler: 256,
+        gScaler: 1,
+        bScaler: 1 / 256,
+        offset: -32768,
+      },
+    });
   }
 }
