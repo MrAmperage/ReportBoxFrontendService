@@ -1,8 +1,8 @@
 const ApiExportKey = Symbol('ApiExport');
 
 export default function ExportApi() {
-  return (Target: object, PropertyKey: string | symbol, Descriptor: PropertyDescriptor): void => {
-    let ApiExport: string[];
+  return (Target: object, PropertyKey: string | symbol, _Descriptor: PropertyDescriptor): void => {
+    let ApiExport: (string | symbol)[];
 
     if (Object.prototype.hasOwnProperty.call(Target, ApiExportKey)) {
       ApiExport = (Target as any)[ApiExportKey];
@@ -17,14 +17,12 @@ export default function ExportApi() {
       });
     }
 
-    const MethodName = PropertyKey.toString();
-
-    if (!ApiExport.includes(MethodName)) {
-      ApiExport.push(MethodName);
+    if (!ApiExport.includes(PropertyKey)) {
+      ApiExport.push(PropertyKey);
     }
   };
 }
 
-export function GetExportApi(Target: object): string[] {
+export function GetExportApiMethods(Target: object): readonly (string | symbol)[] {
   return (Target as any)[ApiExportKey] ?? [];
 }
