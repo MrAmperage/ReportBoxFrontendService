@@ -26,11 +26,9 @@ export default function ExportApi() {
   };
 }
 
-export function InitExportApi(Widget: BaseWidget<BaseWidgetOptions>): void {
+export function InitExportApi<OptionsType extends object>(Widget: { Options: OptionsType }): void {
   const ApiExport: readonly (string | symbol)[] = (Widget as any)[ApiExportKey] ?? [];
-
   const Api: Record<string, (...Args: any[]) => any> = {};
-
   for (const MethodName of ApiExport) {
     const Method = (Widget as any)[MethodName];
 
