@@ -2,7 +2,7 @@ import { TerrainLayer } from 'deck.gl';
 import { PhysicsWidgetApi } from '../../../physicsWidget/physicsWidgetTypes';
 
 export default class TerrainPhysicsLayer extends TerrainLayer {
-  constructor(PhysicsWidgetApi: PhysicsWidgetApi) {
+  constructor(PhysicsWidgetApi: PhysicsWidgetApi, CoordinateOrigin: [number, number, number]) {
     console.log(PhysicsWidgetApi);
     super({
       id: 'TerrainPhysicsLayer',

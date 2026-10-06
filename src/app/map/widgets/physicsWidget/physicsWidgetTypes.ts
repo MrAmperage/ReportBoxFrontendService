@@ -13,7 +13,11 @@ export const PhysicsWidgetKey = BaseWidget.CreateWidgetKey<
   WidgetApi<PhysicsWidgetApi> & PhysicsWidgetOptions
 >('PhysicsWidget');
 
-export type PhysicsWidgetOptions = { Id: string; IsEnablePhysics: boolean };
+export type PhysicsWidgetOptions = {
+  Id: string;
+  IsEnablePhysics: boolean;
+  CoordinateOrigin: [number, number, number];
+};
 export type PhysicsRigidBodyDescription = {
   Type: 'Fixed' | 'Dynamic' | 'KinematicPosition' | 'KinematicVelocity';
   Position?: [number, number, number];

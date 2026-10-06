@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef } from '@angular/core';
 
 import type {
   ColliderDesc,
@@ -17,6 +17,7 @@ import {
   PhysicsRigidBodyDescription,
   PhysicsWidgetOptions,
 } from './physicsWidgetTypes';
+import DeckGlService from '../../deckglService/deckglService';
 
 @Component({
   selector: 'PhysicsWidget',
@@ -24,9 +25,17 @@ import {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class PhysicsWidget extends BaseWidget<PhysicsWidgetOptions> {
-  Options = {
+  constructor(
+    private DeckGlServiceInstance: DeckGlService,
+    private ElementRefInstance: ElementRef<HTMLDivElement>,
+    private ChangeDetectorRefInstance: ChangeDetectorRef,
+  ) {
+    super(DeckGlServiceInstance, ElementRefInstance, ChangeDetectorRefInstance);
+  }
+  Options: PhysicsWidgetOptions = {
     Id: 'PhysicsWidget',
     IsEnablePhysics: true,
+    CoordinateOrigin: [0, 0, 0],
   };
   private readonly MaxStepsPerFrame = 5;
   private readonly PhysicsTimeStep = 1 / 60;
@@ -52,7 +61,14 @@ export default class PhysicsWidget extends BaseWidget<PhysicsWidgetOptions> {
       z: -9.81,
     });
 
-    this.AddLayer(new PhysicsDebugLayer(this.World, [0, 0, 0]));
+    const InitViewState = this.DeckGlServiceInstance.DeckGl.props.initialViewState;
+
+    if (InitViewState !== null) {
+      this.Options.CoordinateOrigin = [InitViewState.longitude, InitViewState.latitude, 0];
+    }
+
+    this.AddLayer(new PhysicsDebugLayer(this.World, this.Options.CoordinateOrigin));
+
     if (this.Options.IsEnablePhysics) {
       this.StartPhysics();
     }
@@ -60,7 +76,6 @@ export default class PhysicsWidget extends BaseWidget<PhysicsWidgetOptions> {
 
   override DestroyWidget(): void {
     this.DestroyPhysics();
-
     super.DestroyWidget();
   }
 
@@ -220,7 +235,7 @@ export default class PhysicsWidget extends BaseWidget<PhysicsWidgetOptions> {
       if (Steps === this.MaxStepsPerFrame) {
         this.PhysicsAccumulator %= this.PhysicsTimeStep;
       }
-      this.UpdateLayer(new PhysicsDebugLayer(this.World, [0, 0, 0]));
+      this.UpdateLayer(new PhysicsDebugLayer(this.World, this.Options.CoordinateOrigin));
       this.PhysicsAnimationFrameId = requestAnimationFrame(Step);
     };
     this.PhysicsAnimationFrameId = requestAnimationFrame(Step);
