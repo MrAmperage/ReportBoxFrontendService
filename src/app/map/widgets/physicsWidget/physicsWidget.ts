@@ -7,7 +7,8 @@ import type {
   RigidBodyHandle,
   World,
 } from '@dimforge/rapier3d-compat';
-import { Box3, Matrix4, Mesh, Object3D, Vector3 } from 'three';
+import { Box3, Matrix4, Mesh, Vector3 } from 'three';
+import type { Object3D } from 'three';
 import BaseWidget from '../baseWidget/baseWidget';
 import ExportApi from '../baseWidget/ExportApiDecorator';
 import PhysicsDebugLayer from './layers/physicsDebugLayer/physicsDebugLayer';
@@ -145,6 +146,9 @@ export default class PhysicsWidget extends BaseWidget<PhysicsWidgetOptions> {
   }
   private CreateBoxColliderDescription(Model: Object3D): PhysicsColliderDescription {
     const Bounds = this.GetModelBounds(Model);
+    if (Bounds.isEmpty()) {
+      throw new Error('Невозможно создать Collider: модель не содержит геометрии');
+    }
     const Size = Bounds.getSize(new Vector3());
     const Center = Bounds.getCenter(new Vector3());
     const Scale = Model.scale;
