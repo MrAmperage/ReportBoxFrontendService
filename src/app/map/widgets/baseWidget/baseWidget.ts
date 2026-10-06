@@ -9,6 +9,7 @@ import {
   OnDestroy,
 } from '@angular/core';
 import { BaseWidgetKey, BaseWidgetOptions, WidgetPlacement } from './baseWidgetTypes';
+import { InitExportApi } from './ExportApiDecorator';
 
 @Directive({
   selector: 'BaseWidget',
@@ -45,6 +46,7 @@ export default abstract class BaseWidget<OptionsType extends BaseWidgetOptions>
     return this.ElementRef.nativeElement;
   }
   ngOnInit(): void {
+    InitExportApi(this);
     this.InitWidget();
   }
   GetOptionsByKey(Key: BaseWidgetKey<BaseWidgetOptions>) {

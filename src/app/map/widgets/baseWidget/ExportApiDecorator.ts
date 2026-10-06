@@ -1,8 +1,11 @@
+import BaseWidget from './baseWidget';
+import { BaseWidgetOptions } from './baseWidgetTypes';
+
 const ApiExportKey = Symbol('ApiExport');
 
 export default function ExportApi() {
-  return (Target: object, PropertyKey: string | symbol, Descriptor: PropertyDescriptor): void => {
-    let ApiExport: string[];
+  return (Target: object, PropertyKey: string | symbol, _Descriptor: PropertyDescriptor): void => {
+    let ApiExport: (string | symbol)[];
 
     if (Object.prototype.hasOwnProperty.call(Target, ApiExportKey)) {
       ApiExport = (Target as any)[ApiExportKey];
@@ -17,14 +20,24 @@ export default function ExportApi() {
       });
     }
 
-    const MethodName = PropertyKey.toString();
-
-    if (!ApiExport.includes(MethodName)) {
-      ApiExport.push(MethodName);
+    if (!ApiExport.includes(PropertyKey)) {
+      ApiExport.push(PropertyKey);
     }
   };
 }
 
-export function GetExportApi(Target: object): string[] {
-  return (Target as any)[ApiExportKey] ?? [];
+export function InitExportApi<OptionsType extends object>(Widget: { Options: OptionsType }): void {
+  const ApiExport: readonly (string | symbol)[] = (Widget as any)[ApiExportKey] ?? [];
+  const Api: Record<string, (...Args: any[]) => any> = {};
+  for (const MethodName of ApiExport) {
+    const Method = (Widget as any)[MethodName];
+
+    if (typeof Method !== 'function') {
+      continue;
+    }
+
+    Api[MethodName.toString()] = Method.bind(Widget);
+  }
+
+  (Widget.Options as any).Api = Api;
 }
