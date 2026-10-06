@@ -7,7 +7,7 @@ import type {
   RigidBodyHandle,
   World,
 } from '@dimforge/rapier3d-compat';
-
+import { Box3, Matrix4, Mesh, Object3D } from 'three';
 import BaseWidget from '../baseWidget/baseWidget';
 import ExportApi from '../baseWidget/ExportApiDecorator';
 import PhysicsDebugLayer from './layers/physicsDebugLayer/physicsDebugLayer';
@@ -116,7 +116,27 @@ export default class PhysicsWidget extends BaseWidget<PhysicsWidgetOptions> {
       this.StopPhysics();
     }
   }
-
+  GetModelBounds(Model: Object3D): Box3 {
+    Model.updateWorldMatrix(true, true);
+    const Bounds = new Box3();
+    const ModelWorldInverse = Model.matrixWorld.clone().invert();
+    Model.traverse((Object) => {
+      if (!(Object instanceof Mesh)) {
+        return;
+      }
+      const Geometry = Object.geometry;
+      if (Geometry.boundingBox === null) {
+        Geometry.computeBoundingBox();
+      }
+      if (Geometry.boundingBox === null) {
+        return;
+      }
+      const LocalMatrix = new Matrix4().multiplyMatrices(ModelWorldInverse, Object.matrixWorld);
+      const MeshBounds = Geometry.boundingBox.clone().applyMatrix4(LocalMatrix);
+      Bounds.union(MeshBounds);
+    });
+    return Bounds;
+  }
   @ExportApi()
   AddRigidBody(Description: PhysicsRigidBodyDescription): RigidBodyHandle {
     const RigidBody = this.World.createRigidBody(this.CreateRigidBodyDescription(Description));
