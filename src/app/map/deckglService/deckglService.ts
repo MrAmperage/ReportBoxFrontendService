@@ -38,11 +38,19 @@ export default class DeckGlService {
   RegisterWidget<OptionsType extends BaseWidgetOptions>(
     Options: OptionsType,
   ): BehaviorSubject<OptionsType> {
-    if (this.WidgetOptionsMap.has(Options.Id)) {
-      throw new Error(`Виджет ${Options.Id} уже зарегистрирован`);
+    const Subject = this.WidgetOptionsMap.get(Options.Id);
+    if (Subject !== undefined) {
+      if (Subject.getValue() !== undefined) {
+        throw new Error(`Виджет ${Options.Id} уже зарегистрирован`);
+      }
+      Subject.next(Options);
+      return Subject as BehaviorSubject<OptionsType>;
     }
-    const NewOptions = new BehaviorSubject(Options);
+
+    const NewOptions = new BehaviorSubject<OptionsType>(Options);
+
     this.WidgetOptionsMap.set(Options.Id, NewOptions);
+
     return NewOptions;
   }
 
