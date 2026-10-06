@@ -21,6 +21,7 @@
     "deck.gl": "^9.4.0",
     "ng-zorro-antd": "^22.1.1",
     "rxjs": "~7.8.0",
+    "three": "^0.186.1",
     "tslib": "^2.3.0"
   },
   "devDependencies": {
