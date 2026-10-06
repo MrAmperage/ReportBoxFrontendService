@@ -8,6 +8,7 @@ export type PhysicsWidgetApi = {
   AddRigidBody(Description: PhysicsRigidBodyDescription): RigidBodyHandle;
   RemoveRigidBody(Id: RigidBodyHandle): void;
   ChangeEnablePhysics(IsEnable: boolean): void;
+  ChangeEnableDebug(IsEnable: boolean): void;
 };
 export const PhysicsWidgetKey = BaseWidget.CreateWidgetKey<
   WidgetApi<PhysicsWidgetApi> & PhysicsWidgetOptions

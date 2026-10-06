@@ -131,9 +131,19 @@ export default class PhysicsWidget extends BaseWidget<PhysicsWidgetOptions> {
     }
     this.World.removeRigidBody(RigidBody);
   }
-  ChangeEnableDebug(IsEnable: boolean) {
-    this.UpdateOptions({ IsEnableDebug: IsEnable });
+  @ExportApi()
+  ChangeEnableDebug(IsEnable: boolean): void {
+    this.UpdateOptions({
+      IsEnableDebug: IsEnable,
+    });
+
+    if (this.Options.IsEnableDebug) {
+      this.AddLayer(new PhysicsDebugLayer(this.World, this.Options.CoordinateOrigin));
+    } else {
+      this.RemoveLayer('PhysicsDebugLayer');
+    }
   }
+
   private CreateColliderDescription(Description: PhysicsColliderDescription): ColliderDesc {
     let ColliderDescription: ColliderDesc;
 
