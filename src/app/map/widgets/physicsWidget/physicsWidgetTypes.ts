@@ -44,3 +44,4 @@ export type PhysicsColliderDescription =
       Vertices: Float32Array;
       Indices: Uint32Array;
     });
+export { ColliderHandle };
