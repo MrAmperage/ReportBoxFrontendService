@@ -7,13 +7,14 @@ import type {
   RigidBodyHandle,
   World,
 } from '@dimforge/rapier3d-compat';
-import { Box3, Matrix4, Mesh, Object3D } from 'three';
+import { Box3, Matrix4, Mesh, Object3D, Vector3 } from 'three';
 import BaseWidget from '../baseWidget/baseWidget';
 import ExportApi from '../baseWidget/ExportApiDecorator';
 import PhysicsDebugLayer from './layers/physicsDebugLayer/physicsDebugLayer';
 
 import {
   PhysicsColliderDescription,
+  PhysicsModelRigidBody,
   PhysicsRigidBodyDescription,
   PhysicsWidgetOptions,
 } from './physicsWidgetTypes';
@@ -142,6 +143,26 @@ export default class PhysicsWidget extends BaseWidget<PhysicsWidgetOptions> {
     const RigidBody = this.World.createRigidBody(this.CreateRigidBodyDescription(Description));
     return RigidBody.handle;
   }
+  private CreateBoxColliderDescription(Model: Object3D): PhysicsColliderDescription {
+    const Bounds = this.GetModelBounds(Model);
+    const Size = Bounds.getSize(new Vector3());
+    const Center = Bounds.getCenter(new Vector3());
+    const Scale = Model.scale;
+    return {
+      Type: 'Cuboid',
+      HalfExtents: [
+        (Size.x * Math.abs(Scale.x)) / 2,
+        (Size.y * Math.abs(Scale.y)) / 2,
+        (Size.z * Math.abs(Scale.z)) / 2,
+      ],
+      Position: [Center.x * Scale.x, Center.y * Scale.y, Center.z * Scale.z],
+    };
+  }
+  @ExportApi()
+  AddModelCollider(Model: Object3D, ParentId?: RigidBodyHandle): ColliderHandle {
+    const Description = this.CreateBoxColliderDescription(Model);
+    return this.AddCollider(Description, ParentId);
+  }
 
   @ExportApi()
   RemoveRigidBody(Id: RigidBodyHandle): void {
@@ -230,10 +251,36 @@ export default class PhysicsWidget extends BaseWidget<PhysicsWidgetOptions> {
     if (Description.Position !== undefined) {
       RigidBodyDescription.setTranslation(...Description.Position);
     }
-
+    if (Description.Rotation !== undefined) {
+      RigidBodyDescription.setRotation({
+        x: Description.Rotation[0],
+        y: Description.Rotation[1],
+        z: Description.Rotation[2],
+        w: Description.Rotation[3],
+      });
+    }
     return RigidBodyDescription;
   }
+  @ExportApi()
+  AddModelRigidBody(
+    Model: Object3D,
+    Type: PhysicsRigidBodyDescription['Type'] = 'Dynamic',
+  ): PhysicsModelRigidBody {
+    const RigidBodyId = this.AddRigidBody({
+      Type,
 
+      Position: [Model.position.x, Model.position.y, Model.position.z],
+
+      Rotation: [Model.quaternion.x, Model.quaternion.y, Model.quaternion.z, Model.quaternion.w],
+    });
+
+    const ColliderId = this.AddModelCollider(Model, RigidBodyId);
+
+    return {
+      RigidBodyId,
+      ColliderId,
+    };
+  }
   StopPhysics(): void {
     if (this.PhysicsAnimationFrameId === undefined) {
       return;

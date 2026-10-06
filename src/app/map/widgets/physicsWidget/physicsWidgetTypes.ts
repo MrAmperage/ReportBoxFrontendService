@@ -1,6 +1,7 @@
 import type { ColliderHandle, RigidBodyHandle } from '@dimforge/rapier3d-compat';
 import BaseWidget from '../baseWidget/baseWidget';
 import { WidgetApi } from '../baseWidget/baseWidgetTypes';
+import { Object3D } from 'three';
 
 export type PhysicsWidgetApi = {
   AddCollider(Description: PhysicsColliderDescription, ParentId?: RigidBodyHandle): ColliderHandle;
@@ -9,6 +10,11 @@ export type PhysicsWidgetApi = {
   RemoveRigidBody(Id: RigidBodyHandle): void;
   ChangeEnablePhysics(IsEnable: boolean): void;
   ChangeEnableDebug(IsEnable: boolean): void;
+  AddModelCollider(Model: Object3D, ParentId?: RigidBodyHandle): ColliderHandle;
+  AddModelRigidBody(
+    Model: Object3D,
+    Type?: PhysicsRigidBodyDescription['Type'],
+  ): PhysicsModelRigidBody;
 };
 export const PhysicsWidgetKey = BaseWidget.CreateWidgetKey<
   WidgetApi<PhysicsWidgetApi> & PhysicsWidgetOptions
@@ -23,6 +29,7 @@ export type PhysicsWidgetOptions = {
 export type PhysicsRigidBodyDescription = {
   Type: 'Fixed' | 'Dynamic' | 'KinematicPosition' | 'KinematicVelocity';
   Position?: [number, number, number];
+  Rotation?: [number, number, number, number];
 };
 
 type PhysicsColliderBaseDescription = {
@@ -32,6 +39,10 @@ type PhysicsColliderBaseDescription = {
   IsSensor?: boolean;
 };
 
+export type PhysicsModelRigidBody = {
+  RigidBodyId: RigidBodyHandle;
+  ColliderId: ColliderHandle;
+};
 export type PhysicsColliderDescription =
   | (PhysicsColliderBaseDescription & {
       Type: 'Cuboid';
