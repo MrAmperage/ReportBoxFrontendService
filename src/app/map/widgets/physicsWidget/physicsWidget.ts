@@ -133,6 +133,9 @@ export default class PhysicsWidget extends BaseWidget<PhysicsWidgetOptions> {
   }
   @ExportApi()
   ChangeEnableDebug(IsEnable: boolean): void {
+    if (this.Options.IsEnableDebug === IsEnable) {
+      return;
+    }
     this.UpdateOptions({
       IsEnableDebug: IsEnable,
     });
