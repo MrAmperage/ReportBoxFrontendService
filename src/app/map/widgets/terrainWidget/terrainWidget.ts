@@ -21,11 +21,11 @@ export default class TerrainWidget extends BaseWidget<TerrainWidgetOptions> {
   override Options: TerrainWidgetOptions = { Id: 'TerrainWidget' };
 
   override InitWidget(): void {
-    super.InitWidget();
-    const PhysicsWidgetOptions = this.DeckGlServiceInstance.GetOptions(PhysicsWidgetKey);
-    if (PhysicsWidgetOptions !== undefined) {
+    const ObservableOptions = this.DeckGlServiceInstance.WaitWidget(PhysicsWidgetKey);
+    ObservableOptions.subscribe((PhysicsWidgetOptions) => {
       const PhysicsWidgetApi = PhysicsWidgetOptions.Api;
       this.AddLayer(new TerrainPhysicsLayer(PhysicsWidgetApi));
-    }
+      super.InitWidget();
+    });
   }
 }

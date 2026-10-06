@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Deck, Layer } from 'deck.gl';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, filter, Observable, take } from 'rxjs';
 
 import { BaseWidgetOptions, BaseWidgetKey } from '../widgets/baseWidget/baseWidgetTypes';
 
@@ -71,6 +71,24 @@ export default class DeckGlService {
     }
   }
 
+  WaitWidget<OptionsType extends BaseWidgetOptions>(
+    Key: BaseWidgetKey<OptionsType>,
+    WatchChanges = false,
+  ): Observable<OptionsType> {
+    let Subject = this.WidgetOptionsMap.get(Key);
+
+    if (Subject === undefined) {
+      Subject = new BehaviorSubject<BaseWidgetOptions | undefined>(undefined);
+
+      this.WidgetOptionsMap.set(Key, Subject);
+    }
+
+    const Options$ = Subject.pipe(
+      filter((Options): Options is OptionsType => Options !== undefined),
+    );
+
+    return WatchChanges ? Options$ : Options$.pipe(take(1));
+  }
   RemoveLayer(Id: string): void {
     const Layers = this.DeckGl.props.layers ?? [];
 
