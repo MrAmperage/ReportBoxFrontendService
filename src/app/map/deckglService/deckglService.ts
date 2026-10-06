@@ -92,15 +92,20 @@ export default class DeckGlService {
     }
     return Option as unknown as BehaviorSubject<OptionsType>;
   }
-  GetOptions<OptionsType extends BaseWidgetOptions>(
+  GetOptions<OptionsType extends BaseWidgetOptions, IsObservable extends boolean = false>(
     Key: BaseWidgetKey<OptionsType>,
-  ): OptionsType | undefined {
+    IsObservable?: IsObservable,
+  ): (IsObservable extends true ? Observable<OptionsType> : OptionsType) | undefined {
     const Subject = this.WidgetOptionsMap.get(Key);
 
     if (Subject === undefined) {
       return undefined;
-    } else {
-      return Subject.getValue() as OptionsType;
     }
+
+    if (IsObservable) {
+      return Subject.asObservable() as any;
+    }
+
+    return Subject.getValue() as any;
   }
 }
