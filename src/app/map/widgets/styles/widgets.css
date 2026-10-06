@@ -1,11 +1,22 @@
 :root {
   --widget-background: #001529;
   --widget-text-color: #ffffff;
+  --widget-padding: 3px;
+  --widget-gap: 10px;
 }
 .Widget {
+  display: block;
   background-color: var(--widget-background);
   color: var(--widget-text-color);
   pointer-events: auto;
   cursor: default;
   border-radius: 3px;
+}
+.WidgetRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: var(--widget-padding);
+  gap: var(--widget-gap);
+  white-space: nowrap;
 }

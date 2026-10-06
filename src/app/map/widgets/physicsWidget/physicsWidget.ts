@@ -18,11 +18,14 @@ import {
   PhysicsWidgetOptions,
 } from './physicsWidgetTypes';
 import DeckGlService from '../../deckglService/deckglService';
+import { NzSwitchComponent } from 'ng-zorro-antd/switch';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'PhysicsWidget',
   templateUrl: './physicsWidget.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [NzSwitchComponent, FormsModule],
 })
 export default class PhysicsWidget extends BaseWidget<PhysicsWidgetOptions> {
   constructor(
