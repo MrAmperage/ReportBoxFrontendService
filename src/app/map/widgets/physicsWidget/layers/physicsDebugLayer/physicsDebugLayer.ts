@@ -1,6 +1,7 @@
 import type { DebugRenderBuffers, World } from '@dimforge/rapier3d-compat';
-import { LineLayer } from 'deck.gl';
+import { LineLayer, LineLayerProps } from 'deck.gl';
 import { PhysicsDebugLine } from './physicsDebugLayerTypes';
+import { ClipExtension, type ClipExtensionProps } from '@deck.gl/extensions';
 
 export default class PhysicsDebugLayer extends LineLayer<PhysicsDebugLine> {
   constructor(World: World, CoordinateOrigin: [number, number, number]) {
@@ -16,7 +17,9 @@ export default class PhysicsDebugLayer extends LineLayer<PhysicsDebugLine> {
       getWidth: 1,
       widthUnits: 'pixels',
       pickable: false,
-    });
+      extensions: [new ClipExtension()],
+      clipBounds: [-15000, -12000, 15000, 12000],
+    } as LineLayerProps<PhysicsDebugLine> & ClipExtensionProps);
   }
 
   static GenerateLines(DebugBuffers: DebugRenderBuffers): PhysicsDebugLine[] {
