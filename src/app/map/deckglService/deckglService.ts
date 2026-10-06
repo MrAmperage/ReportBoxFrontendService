@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Deck, Layer } from 'deck.gl';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, filter, Observable, take } from 'rxjs';
 
 import { BaseWidgetOptions, BaseWidgetKey } from '../widgets/baseWidget/baseWidgetTypes';
 
@@ -38,11 +38,19 @@ export default class DeckGlService {
   RegisterWidget<OptionsType extends BaseWidgetOptions>(
     Options: OptionsType,
   ): BehaviorSubject<OptionsType> {
-    if (this.WidgetOptionsMap.has(Options.Id)) {
-      throw new Error(`Виджет ${Options.Id} уже зарегистрирован`);
+    const Subject = this.WidgetOptionsMap.get(Options.Id);
+    if (Subject !== undefined) {
+      if (Subject.getValue() !== undefined) {
+        throw new Error(`Виджет ${Options.Id} уже зарегистрирован`);
+      }
+      Subject.next(Options);
+      return Subject as BehaviorSubject<OptionsType>;
     }
-    const NewOptions = new BehaviorSubject(Options);
+
+    const NewOptions = new BehaviorSubject<OptionsType>(Options);
+
     this.WidgetOptionsMap.set(Options.Id, NewOptions);
+
     return NewOptions;
   }
 
@@ -71,6 +79,24 @@ export default class DeckGlService {
     }
   }
 
+  WaitWidget<OptionsType extends BaseWidgetOptions>(
+    Key: BaseWidgetKey<OptionsType>,
+    WatchChanges = false,
+  ): Observable<OptionsType> {
+    let Subject = this.WidgetOptionsMap.get(Key);
+
+    if (Subject === undefined) {
+      Subject = new BehaviorSubject<BaseWidgetOptions | undefined>(undefined);
+
+      this.WidgetOptionsMap.set(Key, Subject);
+    }
+
+    const Options$ = Subject.pipe(
+      filter((Options): Options is OptionsType => Options !== undefined),
+    );
+
+    return WatchChanges ? Options$ : Options$.pipe(take(1));
+  }
   RemoveLayer(Id: string): void {
     const Layers = this.DeckGl.props.layers ?? [];
 
@@ -83,13 +109,29 @@ export default class DeckGlService {
     }
   }
 
-  GetOptions<OptionsType extends BaseWidgetOptions>(
+  GetObservableOptions<OptionsType extends BaseWidgetOptions>(
     Key: BaseWidgetKey<OptionsType>,
-  ): Observable<OptionsType> {
+  ): Observable<OptionsType> | undefined {
     const Option = this.WidgetOptionsMap.get(Key);
     if (Option === undefined) {
-      throw new Error(`Виджет ${Key} не зарегистрирован`);
+      return undefined;
     }
     return Option as unknown as BehaviorSubject<OptionsType>;
+  }
+  GetOptions<OptionsType extends BaseWidgetOptions, IsObservable extends boolean = false>(
+    Key: BaseWidgetKey<OptionsType>,
+    IsObservable?: IsObservable,
+  ): (IsObservable extends true ? Observable<OptionsType> : OptionsType) | undefined {
+    const Subject = this.WidgetOptionsMap.get(Key);
+
+    if (Subject === undefined) {
+      return undefined;
+    }
+
+    if (IsObservable) {
+      return Subject.asObservable() as any;
+    }
+
+    return Subject.getValue() as any;
   }
 }
