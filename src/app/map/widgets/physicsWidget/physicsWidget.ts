@@ -34,6 +34,7 @@ export default class PhysicsWidget extends BaseWidget<PhysicsWidgetOptions> {
   }
   Options: PhysicsWidgetOptions = {
     Id: 'PhysicsWidget',
+    IsEnableDebug: false,
     IsEnablePhysics: true,
     CoordinateOrigin: [0, 0, 0],
   };
@@ -129,7 +130,9 @@ export default class PhysicsWidget extends BaseWidget<PhysicsWidgetOptions> {
     }
     this.World.removeRigidBody(RigidBody);
   }
-
+  ChangeEnableDebug(IsEnable: boolean) {
+    this.UpdateOptions({ IsEnableDebug: IsEnable });
+  }
   private CreateColliderDescription(Description: PhysicsColliderDescription): ColliderDesc {
     let ColliderDescription: ColliderDesc;
 

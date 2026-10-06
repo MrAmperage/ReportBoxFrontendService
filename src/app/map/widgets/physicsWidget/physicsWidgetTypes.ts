@@ -15,6 +15,7 @@ export const PhysicsWidgetKey = BaseWidget.CreateWidgetKey<
 
 export type PhysicsWidgetOptions = {
   Id: string;
+  IsEnableDebug: boolean;
   IsEnablePhysics: boolean;
   CoordinateOrigin: [number, number, number];
 };
