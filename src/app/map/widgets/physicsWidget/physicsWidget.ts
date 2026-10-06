@@ -67,8 +67,9 @@ export default class PhysicsWidget extends BaseWidget<PhysicsWidgetOptions> {
     if (InitViewState !== null) {
       this.Options.CoordinateOrigin = [InitViewState.longitude, InitViewState.latitude, 0];
     }
-
-    this.AddLayer(new PhysicsDebugLayer(this.World, this.Options.CoordinateOrigin));
+    if (this.Options.IsEnableDebug) {
+      this.AddLayer(new PhysicsDebugLayer(this.World, this.Options.CoordinateOrigin));
+    }
 
     if (this.Options.IsEnablePhysics) {
       this.StartPhysics();
@@ -238,7 +239,10 @@ export default class PhysicsWidget extends BaseWidget<PhysicsWidgetOptions> {
       if (Steps === this.MaxStepsPerFrame) {
         this.PhysicsAccumulator %= this.PhysicsTimeStep;
       }
-      this.UpdateLayer(new PhysicsDebugLayer(this.World, this.Options.CoordinateOrigin));
+      if (this.Options.IsEnableDebug) {
+        this.UpdateLayer(new PhysicsDebugLayer(this.World, this.Options.CoordinateOrigin));
+      }
+
       this.PhysicsAnimationFrameId = requestAnimationFrame(Step);
     };
     this.PhysicsAnimationFrameId = requestAnimationFrame(Step);
