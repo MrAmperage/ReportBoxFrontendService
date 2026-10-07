@@ -52,20 +52,13 @@ export default class TerrainPhysicsLayer extends TerrainLayer {
   }
   private ConvertVerticesToPhysics(Vertices: Float32Array): Float32Array {
     const Viewport = this.context.viewport;
-
     const [OriginLongitude, OriginLatitude, OriginAltitude] = this.CoordinateOrigin;
-
     const [OriginX, OriginY] = Viewport.projectFlat([OriginLongitude, OriginLatitude]);
-
     const { metersPerUnit } = Viewport.getDistanceScales(this.CoordinateOrigin);
-
     const PhysicsVertices = new Float32Array(Vertices.length);
-
     for (let Index = 0; Index < Vertices.length; Index += 3) {
       PhysicsVertices[Index] = (Vertices[Index] - OriginX) * metersPerUnit[0];
-
       PhysicsVertices[Index + 1] = (Vertices[Index + 1] - OriginY) * metersPerUnit[1];
-
       PhysicsVertices[Index + 2] = Vertices[Index + 2] - OriginAltitude;
     }
 
@@ -73,21 +66,17 @@ export default class TerrainPhysicsLayer extends TerrainLayer {
   }
   override onViewportLoad(Tiles?: Parameters<TerrainLayer['onViewportLoad']>[0]): void {
     super.onViewportLoad(Tiles);
-
     if (Tiles === undefined) {
       return;
     }
-
     const ActiveTileIds = new Set(Tiles.map((Tile) => Tile.id));
-
     for (const [TileId, ColliderId] of this.TerrainColliders) {
       if (ActiveTileIds.has(TileId)) {
         continue;
       }
       this.PhysicsWidgetApi.RemoveCollider(ColliderId);
-      this.TerrainColliders.delete(TileId);
+      this.RemoveTerrainCollider(TileId);
     }
-
     for (const Tile of Tiles) {
       if (this.TerrainColliders.has(Tile.id)) {
         continue;
@@ -96,7 +85,6 @@ export default class TerrainPhysicsLayer extends TerrainLayer {
       if (Mesh == null) {
         continue;
       }
-
       const Position = Mesh.attributes['POSITION'];
       const Indices = Mesh.indices;
       if (Position === undefined || Indices === undefined) {
