@@ -80,11 +80,11 @@ export default class TerrainPhysicsLayer extends TerrainLayer {
 
     const ActiveTileIds = new Set(Tiles.map((Tile) => Tile.id));
 
-    for (const [TileId, ColliderHandle] of this.TerrainColliders) {
+    for (const [TileId, ColliderId] of this.TerrainColliders) {
       if (ActiveTileIds.has(TileId)) {
         continue;
       }
-      this.PhysicsWidgetApi.RemoveCollider(ColliderHandle);
+      this.PhysicsWidgetApi.RemoveCollider(ColliderId);
       this.TerrainColliders.delete(TileId);
     }
 
