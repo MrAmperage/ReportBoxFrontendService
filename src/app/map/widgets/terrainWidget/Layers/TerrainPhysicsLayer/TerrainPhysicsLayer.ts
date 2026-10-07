@@ -1,11 +1,8 @@
 import { TerrainLayer } from 'deck.gl';
-import type {
-  PhysicsColliderId,
-  PhysicsWidgetApi,
-} from '../../../physicsWidget/physicsWidgetTypes';
+import type { PhysicsWidgetApi } from '../../../physicsWidget/physicsWidgetTypes';
 import type { Mesh } from '@loaders.gl/schema';
 export default class TerrainPhysicsLayer extends TerrainLayer {
-  private readonly TerrainColliders = new Map<string, PhysicsColliderId>();
+  private readonly TerrainColliders = new Map<string, number>();
   private readonly PhysicsWidgetApi: PhysicsWidgetApi;
   private readonly CoordinateOrigin: [number, number, number];
   constructor(PhysicsWidgetApi: PhysicsWidgetApi, CoordinateOrigin: [number, number, number]) {
@@ -34,7 +31,7 @@ export default class TerrainPhysicsLayer extends TerrainLayer {
     if (this.TerrainColliders.has(TileId)) {
       return;
     }
-    const ColliderHandle = this.PhysicsWidgetApi.AddCollider({
+    const ColliderId = this.PhysicsWidgetApi.AddCollider({
       Type: 'Trimesh',
       Vertices,
       Indices,
@@ -42,7 +39,7 @@ export default class TerrainPhysicsLayer extends TerrainLayer {
       Restitution: 0,
     });
 
-    this.TerrainColliders.set(TileId, ColliderHandle);
+    this.TerrainColliders.set(TileId, ColliderId);
   }
 
   private RemoveTerrainCollider(TileId: string): void {

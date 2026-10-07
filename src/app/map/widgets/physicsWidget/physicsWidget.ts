@@ -1,5 +1,11 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef } from '@angular/core';
-import type { ColliderDesc, RigidBodyDesc } from '@dimforge/rapier3d-compat';
+
+import type {
+  ColliderDesc,
+  ColliderHandle,
+  RigidBodyDesc,
+  RigidBodyHandle,
+} from '@dimforge/rapier3d-compat';
 import { Box3, Matrix4, Mesh, Vector3 } from 'three';
 import type { Object3D } from 'three';
 import BaseWidget from '../baseWidget/baseWidget';
@@ -7,15 +13,10 @@ import ExportApi from '../baseWidget/ExportApiDecorator';
 import PhysicsDebugLayer from './layers/physicsDebugLayer/physicsDebugLayer';
 import {
   PhysicsColliderDescription,
-  PhysicsColliderId,
-  PhysicsModelRigidBody,
   PhysicsRigidBodyDescription,
-  PhysicsRigidBodyId,
   PhysicsWidgetOptions,
 } from './physicsWidgetTypes';
-
 import DeckGlService from '../../deckglService/deckglService';
-
 import type { PhysicsRegion } from './physicsRegion';
 
 @Component({
@@ -40,9 +41,31 @@ export default class PhysicsWidget extends BaseWidget<PhysicsWidgetOptions> {
   };
 
   private readonly Regions = new Map<string, PhysicsRegion>();
+  private readonly RigidBodies = new Map<
+    number,
+    {
+      RegionId: string;
+      Handle: RigidBodyHandle;
+      Description: PhysicsRigidBodyDescription;
+      ColliderIds: Set<number>;
+    }
+  >();
+
+  private readonly Colliders = new Map<
+    number,
+    {
+      RegionId: string;
+      Handle: ColliderHandle;
+      Description: PhysicsColliderDescription;
+      ParentId?: number;
+    }
+  >();
+
   private readonly RegionSize = 10_000;
   private readonly MaxStepsPerFrame = 5;
   private readonly PhysicsTimeStep = 1 / 60;
+  private NextRigidBodyId = 1;
+  private NextColliderId = 1;
   private LastPhysicsTime = performance.now();
   private PhysicsAccumulator = 0;
   private PhysicsAnimationFrameId: number | undefined = undefined;
@@ -52,7 +75,6 @@ export default class PhysicsWidget extends BaseWidget<PhysicsWidgetOptions> {
       super.InitWidget();
     });
   }
-
   private async InitPhysics(): Promise<void> {
     this.Rapier = await import('@dimforge/rapier3d-compat');
     await this.Rapier.init();
@@ -63,7 +85,6 @@ export default class PhysicsWidget extends BaseWidget<PhysicsWidgetOptions> {
     if (this.Options.IsEnableDebug) {
       this.CreateDebugLayer();
     }
-
     if (this.Options.IsEnablePhysics) {
       this.StartPhysics();
     }
@@ -120,6 +141,7 @@ export default class PhysicsWidget extends BaseWidget<PhysicsWidgetOptions> {
     if (Vertices.length < 3) {
       throw new Error('Невозможно создать Trimesh: отсутствуют вершины');
     }
+
     let MinX = Infinity;
     let MinY = Infinity;
     let MinZ = Infinity;
@@ -166,7 +188,6 @@ export default class PhysicsWidget extends BaseWidget<PhysicsWidgetOptions> {
       RegionVertices[Index + 1] = Vertices[Index + 1] - Region.Origin[1];
       RegionVertices[Index + 2] = Vertices[Index + 2] - Region.Origin[2];
     }
-
     return RegionVertices;
   }
 
@@ -178,29 +199,23 @@ export default class PhysicsWidget extends BaseWidget<PhysicsWidgetOptions> {
       if (Description.Position !== undefined) {
         return {
           ...Description,
-
           Position: this.ToRegionPosition(Description.Position, Region),
         };
       }
-
       return {
         ...Description,
-
         Vertices: this.ConvertTrimeshVerticesToRegion(Description.Vertices, Region),
       };
     }
-
-    const GlobalPosition = Description.Position ?? [0, 0, 0];
-
+    const GlobalPosition: [number, number, number] = Description.Position ?? [0, 0, 0];
     return {
       ...Description,
-
       Position: this.ToRegionPosition(GlobalPosition, Region),
     };
   }
 
   @ExportApi()
-  AddRigidBody(Description: PhysicsRigidBodyDescription): PhysicsRigidBodyId {
+  AddRigidBody(Description: PhysicsRigidBodyDescription): number {
     const GlobalPosition: [number, number, number] = Description.Position ?? [0, 0, 0];
     const Region = this.GetOrCreateRegion(GlobalPosition);
     const RegionPosition = this.ToRegionPosition(GlobalPosition, Region);
@@ -212,73 +227,102 @@ export default class PhysicsWidget extends BaseWidget<PhysicsWidgetOptions> {
       }),
     );
 
-    return {
+    const Id = this.NextRigidBodyId++;
+    this.RigidBodies.set(Id, {
       RegionId: Region.Id,
       Handle: RigidBody.handle,
-    };
+      Description: {
+        ...Description,
+      },
+
+      ColliderIds: new Set<number>(),
+    });
+    return Id;
   }
 
   @ExportApi()
-  RemoveRigidBody(Id: PhysicsRigidBodyId): void {
-    const Region = this.Regions.get(Id.RegionId);
-
-    if (Region === undefined) {
+  RemoveRigidBody(Id: number): void {
+    const Record = this.RigidBodies.get(Id);
+    if (Record === undefined) {
       return;
     }
-    const RigidBody = Region.World.getRigidBody(Id.Handle);
-    if (RigidBody == null) {
-      return;
-    }
-    Region.World.removeRigidBody(RigidBody);
-  }
-
-  @ExportApi()
-  AddCollider(
-    Description: PhysicsColliderDescription,
-    ParentId?: PhysicsRigidBodyId,
-  ): PhysicsColliderId {
-    if (ParentId !== undefined) {
-      const Region = this.Regions.get(ParentId.RegionId);
-      if (Region === undefined) {
-        throw new Error(`PhysicsRegion ${ParentId.RegionId} не найден`);
+    const Region = this.Regions.get(Record.RegionId);
+    if (Region !== undefined) {
+      const RigidBody = Region.World.getRigidBody(Record.Handle);
+      if (RigidBody != null) {
+        Region.World.removeRigidBody(RigidBody);
       }
-      const Parent = Region.World.getRigidBody(ParentId.Handle);
+    }
+    for (const ColliderId of Record.ColliderIds) {
+      this.Colliders.delete(ColliderId);
+    }
+    this.RigidBodies.delete(Id);
+  }
+
+  @ExportApi()
+  AddCollider(Description: PhysicsColliderDescription, ParentId?: number): number {
+    if (ParentId !== undefined) {
+      const ParentRecord = this.RigidBodies.get(ParentId);
+      if (ParentRecord === undefined) {
+        throw new Error(`RigidBody ${ParentId} не найден`);
+      }
+      const Region = this.Regions.get(ParentRecord.RegionId);
+      if (Region === undefined) {
+        throw new Error(`PhysicsRegion ${ParentRecord.RegionId} не найден`);
+      }
+      const Parent = Region.World.getRigidBody(ParentRecord.Handle);
       if (Parent == null) {
-        throw new Error(`RigidBody ${ParentId.Handle} не найден в регионе ${ParentId.RegionId}`);
+        throw new Error(`RigidBody ${ParentId} не найден`);
       }
       const Collider = Region.World.createCollider(
         this.CreateColliderDescription(Description),
         Parent,
       );
-
-      return {
+      const Id = this.NextColliderId++;
+      this.Colliders.set(Id, {
         RegionId: Region.Id,
         Handle: Collider.handle,
-      };
+        Description: {
+          ...Description,
+        },
+        ParentId,
+      });
+      ParentRecord.ColliderIds.add(Id);
+      return Id;
     }
 
     const GlobalPosition = this.GetColliderGlobalPosition(Description);
     const Region = this.GetOrCreateRegion(GlobalPosition);
     const RegionDescription = this.PrepareColliderDescription(Description, Region);
     const Collider = Region.World.createCollider(this.CreateColliderDescription(RegionDescription));
-
-    return {
+    const Id = this.NextColliderId++;
+    this.Colliders.set(Id, {
       RegionId: Region.Id,
       Handle: Collider.handle,
-    };
+      Description: {
+        ...Description,
+      },
+    });
+    return Id;
   }
 
   @ExportApi()
-  RemoveCollider(Id: PhysicsColliderId): void {
-    const Region = this.Regions.get(Id.RegionId);
-    if (Region === undefined) {
+  RemoveCollider(Id: number): void {
+    const Record = this.Colliders.get(Id);
+    if (Record === undefined) {
       return;
     }
-    const Collider = Region.World.getCollider(Id.Handle);
-    if (Collider == null) {
-      return;
+    const Region = this.Regions.get(Record.RegionId);
+    if (Region !== undefined) {
+      const Collider = Region.World.getCollider(Record.Handle);
+      if (Collider != null) {
+        Region.World.removeCollider(Collider, true);
+      }
     }
-    Region.World.removeCollider(Collider, true);
+    if (Record.ParentId !== undefined) {
+      this.RigidBodies.get(Record.ParentId)?.ColliderIds.delete(Id);
+    }
+    this.Colliders.delete(Id);
   }
 
   GetModelBounds(Model: Object3D): Box3 {
@@ -300,7 +344,6 @@ export default class PhysicsWidget extends BaseWidget<PhysicsWidgetOptions> {
       const MeshBounds = Geometry.boundingBox.clone().applyMatrix4(LocalMatrix);
       Bounds.union(MeshBounds);
     });
-
     return Bounds;
   }
 
@@ -316,9 +359,7 @@ export default class PhysicsWidget extends BaseWidget<PhysicsWidgetOptions> {
       Type: 'Cuboid',
       HalfExtents: [
         (Size.x * Math.abs(Scale.x)) / 2,
-
         (Size.y * Math.abs(Scale.y)) / 2,
-
         (Size.z * Math.abs(Scale.z)) / 2,
       ],
       Position: [Center.x * Scale.x, Center.y * Scale.y, Center.z * Scale.z],
@@ -326,7 +367,7 @@ export default class PhysicsWidget extends BaseWidget<PhysicsWidgetOptions> {
   }
 
   @ExportApi()
-  AddModelCollider(Model: Object3D, ParentId?: PhysicsRigidBodyId): PhysicsColliderId {
+  AddModelCollider(Model: Object3D, ParentId?: number): number {
     const Description = this.CreateBoxColliderDescription(Model);
     return this.AddCollider(Description, ParentId);
   }
@@ -335,7 +376,10 @@ export default class PhysicsWidget extends BaseWidget<PhysicsWidgetOptions> {
   AddModelRigidBody(
     Model: Object3D,
     Type: PhysicsRigidBodyDescription['Type'] = 'Dynamic',
-  ): PhysicsModelRigidBody {
+  ): {
+    RigidBodyId: number;
+    ColliderId: number;
+  } {
     const RigidBodyId = this.AddRigidBody({
       Type,
       Position: [Model.position.x, Model.position.y, Model.position.z],
@@ -343,7 +387,6 @@ export default class PhysicsWidget extends BaseWidget<PhysicsWidgetOptions> {
     });
 
     const ColliderId = this.AddModelCollider(Model, RigidBodyId);
-
     return {
       RigidBodyId,
       ColliderId,
@@ -366,7 +409,6 @@ export default class PhysicsWidget extends BaseWidget<PhysicsWidgetOptions> {
         );
         break;
     }
-
     if (Description.Position !== undefined) {
       ColliderDescription.setTranslation(...Description.Position);
     }
@@ -398,7 +440,6 @@ export default class PhysicsWidget extends BaseWidget<PhysicsWidgetOptions> {
         RigidBodyDescription = this.Rapier.RigidBodyDesc.kinematicVelocityBased();
         break;
     }
-
     if (Description.Position !== undefined) {
       RigidBodyDescription.setTranslation(...Description.Position);
     }
@@ -410,8 +451,113 @@ export default class PhysicsWidget extends BaseWidget<PhysicsWidgetOptions> {
         w: Description.Rotation[3],
       });
     }
-
     return RigidBodyDescription;
+  }
+  private MigrateRigidBodies(): void {
+    for (const [Id, Record] of this.RigidBodies) {
+      if (Record.Description.Type === 'Fixed') {
+        continue;
+      }
+      const CurrentRegion = this.Regions.get(Record.RegionId);
+      if (CurrentRegion === undefined) {
+        continue;
+      }
+      const RigidBody = CurrentRegion.World.getRigidBody(Record.Handle);
+      if (RigidBody == null) {
+        continue;
+      }
+      const Translation = RigidBody.translation();
+      const GlobalPosition: [number, number, number] = [
+        Translation.x + CurrentRegion.Origin[0],
+        Translation.y + CurrentRegion.Origin[1],
+        Translation.z + CurrentRegion.Origin[2],
+      ];
+      const [RegionX, RegionY] = this.GetRegionCoordinates(GlobalPosition);
+      const NewRegionId = this.GetRegionId(RegionX, RegionY);
+      if (NewRegionId === CurrentRegion.Id) {
+        continue;
+      }
+      this.MigrateRigidBody(Id, GlobalPosition);
+    }
+  }
+  private MigrateRigidBody(
+    Id: number,
+
+    GlobalPosition: [number, number, number],
+  ): void {
+    const Record = this.RigidBodies.get(Id);
+    if (Record === undefined) {
+      return;
+    }
+    const CurrentRegion = this.Regions.get(Record.RegionId);
+    if (CurrentRegion === undefined) {
+      return;
+    }
+    const CurrentRigidBody = CurrentRegion.World.getRigidBody(Record.Handle);
+    if (CurrentRigidBody == null) {
+      return;
+    }
+    const Rotation = CurrentRigidBody.rotation();
+    const LinearVelocity = CurrentRigidBody.linvel();
+    const AngularVelocity = CurrentRigidBody.angvel();
+    const NewRegion = this.GetOrCreateRegion(GlobalPosition);
+    if (NewRegion.Id === CurrentRegion.Id) {
+      return;
+    }
+    const NewPosition = this.ToRegionPosition(GlobalPosition, NewRegion);
+    const NewRigidBody = NewRegion.World.createRigidBody(
+      this.CreateRigidBodyDescription({
+        ...Record.Description,
+        Position: NewPosition,
+        Rotation: [Rotation.x, Rotation.y, Rotation.z, Rotation.w],
+      }),
+    );
+    NewRigidBody.setLinvel(
+      {
+        x: LinearVelocity.x,
+        y: LinearVelocity.y,
+        z: LinearVelocity.z,
+      },
+      true,
+    );
+    NewRigidBody.setAngvel(
+      {
+        x: AngularVelocity.x,
+        y: AngularVelocity.y,
+        z: AngularVelocity.z,
+      },
+      true,
+    );
+    const NewColliderHandles = new Map<number, ColliderHandle>();
+    try {
+      for (const ColliderId of Record.ColliderIds) {
+        const ColliderRecord = this.Colliders.get(ColliderId);
+
+        if (ColliderRecord === undefined) {
+          continue;
+        }
+        const NewCollider = NewRegion.World.createCollider(
+          this.CreateColliderDescription(ColliderRecord.Description),
+
+          NewRigidBody,
+        );
+        NewColliderHandles.set(ColliderId, NewCollider.handle);
+      }
+    } catch (Error) {
+      NewRegion.World.removeRigidBody(NewRigidBody);
+      throw Error;
+    }
+    CurrentRegion.World.removeRigidBody(CurrentRigidBody);
+    Record.RegionId = NewRegion.Id;
+    Record.Handle = NewRigidBody.handle;
+    for (const [ColliderId, Handle] of NewColliderHandles) {
+      const ColliderRecord = this.Colliders.get(ColliderId);
+      if (ColliderRecord === undefined) {
+        continue;
+      }
+      ColliderRecord.RegionId = NewRegion.Id;
+      ColliderRecord.Handle = Handle;
+    }
   }
 
   @ExportApi()
@@ -443,7 +589,6 @@ export default class PhysicsWidget extends BaseWidget<PhysicsWidgetOptions> {
       this.RemoveLayer('PhysicsDebugLayer');
     }
   }
-
   private CreateDebugLayer(): void {
     this.AddLayer(new PhysicsDebugLayer(this.Regions.values(), this.Options.CoordinateOrigin));
   }
@@ -464,7 +609,12 @@ export default class PhysicsWidget extends BaseWidget<PhysicsWidgetOptions> {
       Region.World.free();
     }
     this.Regions.clear();
+    this.RigidBodies.clear();
+    this.Colliders.clear();
+    this.NextRigidBodyId = 1;
+    this.NextColliderId = 1;
   }
+
   StartPhysics(): void {
     if (this.PhysicsAnimationFrameId !== undefined) {
       return;
@@ -480,10 +630,10 @@ export default class PhysicsWidget extends BaseWidget<PhysicsWidgetOptions> {
         for (const Region of this.Regions.values()) {
           Region.World.step();
         }
+        this.MigrateRigidBodies();
         this.PhysicsAccumulator -= this.PhysicsTimeStep;
         Steps++;
       }
-
       if (Steps === this.MaxStepsPerFrame) {
         this.PhysicsAccumulator %= this.PhysicsTimeStep;
       }
