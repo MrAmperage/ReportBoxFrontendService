@@ -74,7 +74,6 @@ export default class TerrainPhysicsLayer extends TerrainLayer {
       if (ActiveTileIds.has(TileId)) {
         continue;
       }
-      this.PhysicsWidgetApi.RemoveCollider(ColliderId);
       this.RemoveTerrainCollider(TileId);
     }
     for (const Tile of Tiles) {
