@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { transpose } from 'date-fns';
-import { TZDate } from '@date-fns/tz';
+import { TZDate, tz } from '@date-fns/tz';
+
 @Injectable({ providedIn: 'root' })
 export default class DateTimeService {
   DateToTimeZone(Value: Date, TimeZone: string): Date {
@@ -9,5 +10,8 @@ export default class DateTimeService {
     return transpose(ZonedDate, Date);
   }
 
-  DateToUtc(Date: Date, TimeZone: string) {}
+  DateToUtc(Value: Date, TimeZone: string): Date {
+    const ZonedDate = transpose(Value, tz(TimeZone));
+    return new Date(ZonedDate.getTime());
+  }
 }
