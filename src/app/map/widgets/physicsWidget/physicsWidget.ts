@@ -20,6 +20,7 @@ import {
   PhysicsWidgetOptions,
 } from './physicsWidgetTypes';
 import DeckGlService from '../../deckglService/deckglService';
+import { PhysicsRegion } from './physicsRegion';
 
 @Component({
   selector: 'PhysicsWidget',
@@ -40,6 +41,8 @@ export default class PhysicsWidget extends BaseWidget<PhysicsWidgetOptions> {
     IsEnablePhysics: true,
     CoordinateOrigin: [0, 0, 0],
   };
+  private readonly Regions = new Map<string, PhysicsRegion>();
+  private readonly RegionSize = 10000;
   private readonly MaxStepsPerFrame = 5;
   private readonly PhysicsTimeStep = 1 / 60;
   private LastPhysicsTime = performance.now();
@@ -55,15 +58,7 @@ export default class PhysicsWidget extends BaseWidget<PhysicsWidgetOptions> {
 
   async InitPhysics(): Promise<void> {
     this.Rapier = await import('@dimforge/rapier3d-compat');
-
     await this.Rapier.init();
-
-    this.World = new this.Rapier.World({
-      x: 0,
-      y: 0,
-      z: -9.81,
-    });
-
     const InitViewState = this.DeckGlServiceInstance.DeckGl.props.initialViewState;
 
     if (InitViewState !== null) {
@@ -98,7 +93,46 @@ export default class PhysicsWidget extends BaseWidget<PhysicsWidgetOptions> {
 
     return Collider.handle;
   }
+  private GetRegionCoordinates(Position: [number, number, number]): [number, number] {
+    return [Math.floor(Position[0] / this.RegionSize), Math.floor(Position[1] / this.RegionSize)];
+  }
 
+  private GetRegionId(X: number, Y: number): string {
+    return `${X}:${Y}`;
+  }
+
+  private GetOrCreateRegion(Position: [number, number, number]): PhysicsRegion {
+    const [X, Y] = this.GetRegionCoordinates(Position);
+    const Id = this.GetRegionId(X, Y);
+    const ExistingRegion = this.Regions.get(Id);
+    if (ExistingRegion !== undefined) {
+      return ExistingRegion;
+    }
+    const Region: PhysicsRegion = {
+      Id,
+      X,
+      Y,
+      Origin: [X * this.RegionSize, Y * this.RegionSize, 0],
+      World: new this.Rapier.World({
+        x: 0,
+        y: 0,
+        z: -9.81,
+      }),
+    };
+    Region.World.timestep = this.PhysicsTimeStep;
+    this.Regions.set(Id, Region);
+    return Region;
+  }
+  private ToRegionPosition(
+    Position: [number, number, number],
+    Region: PhysicsRegion,
+  ): [number, number, number] {
+    return [
+      Position[0] - Region.Origin[0],
+      Position[1] - Region.Origin[1],
+      Position[2] - Region.Origin[2],
+    ];
+  }
   @ExportApi()
   RemoveCollider(Id: ColliderHandle): void {
     const Collider = this.World.getCollider(Id);

@@ -4,17 +4,20 @@ import { WidgetApi } from '../baseWidget/baseWidgetTypes';
 import { Object3D } from 'three';
 
 export type PhysicsWidgetApi = {
-  AddCollider(Description: PhysicsColliderDescription, ParentId?: RigidBodyHandle): ColliderHandle;
-  RemoveCollider(Id: ColliderHandle): void;
-  AddRigidBody(Description: PhysicsRigidBodyDescription): RigidBodyHandle;
-  RemoveRigidBody(Id: RigidBodyHandle): void;
-  ChangeEnablePhysics(IsEnable: boolean): void;
-  ChangeEnableDebug(IsEnable: boolean): void;
-  AddModelCollider(Model: Object3D, ParentId?: RigidBodyHandle): ColliderHandle;
+  AddCollider(
+    Description: PhysicsColliderDescription,
+    ParentId?: PhysicsRigidBodyId,
+  ): PhysicsColliderId;
+  RemoveCollider(Id: PhysicsColliderId): void;
+  AddRigidBody(Description: PhysicsRigidBodyDescription): PhysicsRigidBodyId;
+  RemoveRigidBody(Id: PhysicsRigidBodyId): void;
+  AddModelCollider(Model: Object3D, ParentId?: PhysicsRigidBodyId): PhysicsColliderId;
   AddModelRigidBody(
     Model: Object3D,
     Type?: PhysicsRigidBodyDescription['Type'],
   ): PhysicsModelRigidBody;
+  ChangeEnablePhysics(IsEnable: boolean): void;
+  ChangeEnableDebug(IsEnable: boolean): void;
 };
 export const PhysicsWidgetKey = BaseWidget.CreateWidgetKey<
   WidgetApi<PhysicsWidgetApi> & PhysicsWidgetOptions
@@ -39,10 +42,6 @@ type PhysicsColliderBaseDescription = {
   IsSensor?: boolean;
 };
 
-export type PhysicsModelRigidBody = {
-  RigidBodyId: RigidBodyHandle;
-  ColliderId: ColliderHandle;
-};
 export type PhysicsColliderDescription =
   | (PhysicsColliderBaseDescription & {
       Type: 'Cuboid';
@@ -57,4 +56,16 @@ export type PhysicsColliderDescription =
       Vertices: Float32Array;
       Indices: Uint32Array;
     });
+export type PhysicsRigidBodyId = {
+  RegionId: string;
+  Handle: RigidBodyHandle;
+};
+export type PhysicsColliderId = {
+  RegionId: string;
+  Handle: ColliderHandle;
+};
+export type PhysicsModelRigidBody = {
+  RigidBodyId: PhysicsRigidBodyId;
+  ColliderId: PhysicsColliderId;
+};
 export { ColliderHandle };
