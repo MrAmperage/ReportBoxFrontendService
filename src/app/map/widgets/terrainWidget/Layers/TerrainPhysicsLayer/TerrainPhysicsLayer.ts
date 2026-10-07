@@ -43,11 +43,11 @@ export default class TerrainPhysicsLayer extends TerrainLayer {
   }
 
   private RemoveTerrainCollider(TileId: string): void {
-    const ColliderHandle = this.TerrainColliders.get(TileId);
-    if (ColliderHandle === undefined) {
+    const ColliderId = this.TerrainColliders.get(TileId);
+    if (ColliderId === undefined) {
       return;
     }
-    this.PhysicsWidgetApi.RemoveCollider(ColliderHandle);
+    this.PhysicsWidgetApi.RemoveCollider(ColliderId);
     this.TerrainColliders.delete(TileId);
   }
   private ConvertVerticesToPhysics(Vertices: Float32Array): Float32Array {
