@@ -70,7 +70,7 @@ export default class TerrainPhysicsLayer extends TerrainLayer {
       return;
     }
     const ActiveTileIds = new Set(Tiles.map((Tile) => Tile.id));
-    for (const [TileId, ColliderId] of this.TerrainColliders) {
+    for (const [TileId] of this.TerrainColliders) {
       if (ActiveTileIds.has(TileId)) {
         continue;
       }
