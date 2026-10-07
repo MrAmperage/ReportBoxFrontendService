@@ -13,11 +13,11 @@ import ExportApi from '../baseWidget/ExportApiDecorator';
 import PhysicsDebugLayer from './layers/physicsDebugLayer/physicsDebugLayer';
 import {
   PhysicsColliderDescription,
+  PhysicsRegion,
   PhysicsRigidBodyDescription,
   PhysicsWidgetOptions,
 } from './physicsWidgetTypes';
 import DeckGlService from '../../deckglService/deckglService';
-import type { PhysicsRegion } from './physicsRegion';
 
 @Component({
   selector: 'PhysicsWidget',

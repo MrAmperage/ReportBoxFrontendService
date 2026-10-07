@@ -1,14 +1,16 @@
 import type { DebugRenderBuffers } from '@dimforge/rapier3d-compat';
 import { LineLayer } from 'deck.gl';
 import { PhysicsDebugLine } from './physicsDebugLayerTypes';
-import type { PhysicsRegion } from '../../physicsRegion';
+import { PhysicsRegion } from '../../physicsWidgetTypes';
+
 export default class PhysicsDebugLayer extends LineLayer<PhysicsDebugLine> {
   constructor(Regions: Iterable<PhysicsRegion>, CoordinateOrigin: [number, number, number]) {
     const Lines: PhysicsDebugLine[] = [];
     for (const Region of Regions) {
       const DebugBuffers = Region.World.debugRender();
-      Lines.push(...PhysicsDebugLayer.GenerateLines(DebugBuffers, Region.Origin));
+      PhysicsDebugLayer.GenerateLines(DebugBuffers, Region.Origin, Lines);
     }
+
     super({
       id: 'PhysicsDebugLayer',
       data: Lines,
@@ -22,20 +24,24 @@ export default class PhysicsDebugLayer extends LineLayer<PhysicsDebugLine> {
       pickable: false,
     });
   }
+
   static GenerateLines(
     DebugBuffers: DebugRenderBuffers,
     Offset: [number, number, number],
-  ): PhysicsDebugLine[] {
-    const Lines: PhysicsDebugLine[] = [];
+    Lines: PhysicsDebugLine[],
+  ): void {
     for (let Index = 0; Index < DebugBuffers.vertices.length; Index += 6) {
       const LineIndex = Index / 6;
+
       const ColorIndex = LineIndex * 8;
+
       Lines.push({
         Source: [
           DebugBuffers.vertices[Index] + Offset[0],
           DebugBuffers.vertices[Index + 1] + Offset[1],
           DebugBuffers.vertices[Index + 2] + Offset[2],
         ],
+
         Target: [
           DebugBuffers.vertices[Index + 3] + Offset[0],
           DebugBuffers.vertices[Index + 4] + Offset[1],
@@ -50,6 +56,5 @@ export default class PhysicsDebugLayer extends LineLayer<PhysicsDebugLine> {
         ],
       });
     }
-    return Lines;
   }
 }

@@ -1,3 +1,4 @@
+import { World } from '@dimforge/rapier3d-compat';
 import BaseWidget from '../baseWidget/baseWidget';
 import { WidgetApi } from '../baseWidget/baseWidgetTypes';
 import type { Object3D } from 'three';
@@ -55,3 +56,11 @@ export type PhysicsColliderDescription =
       Vertices: Float32Array;
       Indices: Uint32Array;
     });
+
+export type PhysicsRegion = {
+  Id: string;
+  X: number;
+  Y: number;
+  Origin: [number, number, number];
+  World: World;
+};
