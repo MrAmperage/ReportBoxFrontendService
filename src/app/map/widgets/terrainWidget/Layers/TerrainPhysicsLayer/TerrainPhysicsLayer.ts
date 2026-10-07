@@ -1,8 +1,11 @@
 import { TerrainLayer } from 'deck.gl';
-import { ColliderHandle, PhysicsWidgetApi } from '../../../physicsWidget/physicsWidgetTypes';
+import type {
+  PhysicsColliderId,
+  PhysicsWidgetApi,
+} from '../../../physicsWidget/physicsWidgetTypes';
 import type { Mesh } from '@loaders.gl/schema';
 export default class TerrainPhysicsLayer extends TerrainLayer {
-  private readonly TerrainColliders = new Map<string, ColliderHandle>();
+  private readonly TerrainColliders = new Map<string, PhysicsColliderId>();
   private readonly PhysicsWidgetApi: PhysicsWidgetApi;
   private readonly CoordinateOrigin: [number, number, number];
   constructor(PhysicsWidgetApi: PhysicsWidgetApi, CoordinateOrigin: [number, number, number]) {
