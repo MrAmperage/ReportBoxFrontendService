@@ -146,7 +146,9 @@ export default class PhysicsWidget extends BaseWidget<PhysicsWidgetOptions> {
 
     const Region: PhysicsRegion = {
       Id,
+
       X,
+
       Y,
 
       Origin: [X * this.RegionSize, Y * this.RegionSize, 0],
@@ -272,8 +274,11 @@ export default class PhysicsWidget extends BaseWidget<PhysicsWidgetOptions> {
 
       case 'Trimesh': {
         let MinX = Infinity;
+
         let MinY = Infinity;
+
         let MaxX = -Infinity;
+
         let MaxY = -Infinity;
 
         for (let Index = 0; Index < Description.Vertices.length; Index += 3) {
@@ -307,6 +312,7 @@ export default class PhysicsWidget extends BaseWidget<PhysicsWidgetOptions> {
       MaxX: number;
       MaxY: number;
     },
+
     Second: {
       MinX: number;
       MinY: number;
@@ -329,6 +335,7 @@ export default class PhysicsWidget extends BaseWidget<PhysicsWidgetOptions> {
         Type: 'Trimesh';
       }
     >,
+
     Region: PhysicsRegion,
   ): PhysicsColliderDescription | undefined {
     const RegionBounds = this.GetRegionBounds(Region);
@@ -358,7 +365,13 @@ export default class PhysicsWidget extends BaseWidget<PhysicsWidgetOptions> {
 
       const NewIndex = RegionVertices.length / 3;
 
-      RegionVertices.push(X - Region.Origin[0], Y - Region.Origin[1], Z - Region.Origin[2]);
+      RegionVertices.push(
+        X - Region.Origin[0],
+
+        Y - Region.Origin[1],
+
+        Z - Region.Origin[2],
+      );
 
       VertexMap.set(SourceIndex, NewIndex);
 
@@ -428,6 +441,7 @@ export default class PhysicsWidget extends BaseWidget<PhysicsWidgetOptions> {
 
   private CreateStaticColliderDescriptionForRegion(
     Description: PhysicsColliderDescription,
+
     Region: PhysicsRegion,
   ): PhysicsColliderDescription | undefined {
     if (Description.Type === 'Trimesh') {
@@ -451,7 +465,11 @@ export default class PhysicsWidget extends BaseWidget<PhysicsWidgetOptions> {
     };
   }
 
-  private AttachStaticColliderToRegion(Record: PhysicsColliderRecord, Region: PhysicsRegion): void {
+  private AttachStaticColliderToRegion(
+    Record: PhysicsColliderRecord,
+
+    Region: PhysicsRegion,
+  ): void {
     if (Record.ParentId !== undefined) {
       return;
     }
@@ -545,7 +563,11 @@ export default class PhysicsWidget extends BaseWidget<PhysicsWidgetOptions> {
   }
 
   @ExportApi()
-  AddCollider(Description: PhysicsColliderDescription, ParentId?: number): number {
+  AddCollider(
+    Description: PhysicsColliderDescription,
+
+    ParentId?: number,
+  ): number {
     if (ParentId !== undefined) {
       const ParentRecord = this.RigidBodies.get(ParentId);
 
@@ -704,7 +726,11 @@ export default class PhysicsWidget extends BaseWidget<PhysicsWidgetOptions> {
   }
 
   @ExportApi()
-  AddModelCollider(Model: Object3D, ParentId?: number): number {
+  AddModelCollider(
+    Model: Object3D,
+
+    ParentId?: number,
+  ): number {
     const Description = this.CreateBoxColliderDescription(Model);
 
     return this.AddCollider(Description, ParentId);
@@ -713,6 +739,7 @@ export default class PhysicsWidget extends BaseWidget<PhysicsWidgetOptions> {
   @ExportApi()
   AddModelRigidBody(
     Model: Object3D,
+
     Type: PhysicsRigidBodyDescription['Type'] = 'Dynamic',
   ): {
     RigidBodyId: number;
@@ -860,7 +887,11 @@ export default class PhysicsWidget extends BaseWidget<PhysicsWidgetOptions> {
     }
   }
 
-  private MigrateRigidBody(Id: number, GlobalPosition: [number, number, number]): void {
+  private MigrateRigidBody(
+    Id: number,
+
+    GlobalPosition: [number, number, number],
+  ): void {
     const Record = this.RigidBodies.get(Id);
 
     if (Record === undefined) {
@@ -1119,7 +1150,11 @@ export default class PhysicsWidget extends BaseWidget<PhysicsWidgetOptions> {
     });
   };
 
-  private UpdateDebugRegionByPointerPosition(X: number, Y: number): void {
+  private UpdateDebugRegionByPointerPosition(
+    X: number,
+
+    Y: number,
+  ): void {
     const PickInfo = this.DeckGlServiceInstance.DeckGl.pickObject({
       x: X,
       y: Y,
@@ -1140,11 +1175,22 @@ export default class PhysicsWidget extends BaseWidget<PhysicsWidgetOptions> {
     const Viewport = PickInfo.viewport ?? this.DeckGlServiceInstance.DeckGl.getViewports()[0];
 
     if (Viewport === undefined) {
+      this.ClearDebugRegion();
+
       return;
     }
 
+    /*
+     * То же преобразование, которое
+     * используется TerrainPhysicsLayer:
+     *
+     * lng/lat
+     *   -> WebMercator common coordinates
+     *   -> physics meters.
+     */
     const [OriginX, OriginY] = Viewport.projectFlat([
       this.Options.CoordinateOrigin[0],
+
       this.Options.CoordinateOrigin[1],
     ]);
 
@@ -1193,32 +1239,80 @@ export default class PhysicsWidget extends BaseWidget<PhysicsWidgetOptions> {
     }
   }
 
+  /*
+   * Rapier хранит координаты региона
+   * локально.
+   *
+   * Здесь сначала возвращаем их в
+   * глобальные physics meters,
+   * затем выполняем ТОЧНО обратное
+   * преобразование тому, которое
+   * используется TerrainPhysicsLayer.
+   *
+   * physics meters
+   *   -> WebMercator common coordinates
+   *   -> lng/lat.
+   */
   private GenerateDebugLines(Region: PhysicsRegion): PhysicsDebugLine[] {
+    const Viewport = this.DeckGlServiceInstance.DeckGl.getViewports()[0];
+
+    if (Viewport === undefined) {
+      return [];
+    }
+
+    const [OriginX, OriginY] = Viewport.projectFlat([
+      this.Options.CoordinateOrigin[0],
+
+      this.Options.CoordinateOrigin[1],
+    ]);
+
+    const { metersPerUnit } = Viewport.getDistanceScales(this.Options.CoordinateOrigin);
+
     const DebugBuffers = Region.World.debugRender();
 
     const Lines: PhysicsDebugLine[] = [];
+
+    const ToLngLat = (
+      X: number,
+
+      Y: number,
+
+      Z: number,
+    ): [number, number, number] => {
+      const ProjectedX = OriginX + X / metersPerUnit[0];
+
+      const ProjectedY = OriginY + Y / metersPerUnit[1];
+
+      const [Longitude, Latitude] = Viewport.unprojectFlat([ProjectedX, ProjectedY]);
+
+      return [Longitude, Latitude, Z + this.Options.CoordinateOrigin[2]];
+    };
 
     for (let Index = 0; Index < DebugBuffers.vertices.length; Index += 6) {
       const LineIndex = Index / 6;
 
       const ColorIndex = LineIndex * 8;
 
+      const Source = ToLngLat(
+        DebugBuffers.vertices[Index] + Region.Origin[0],
+
+        DebugBuffers.vertices[Index + 1] + Region.Origin[1],
+
+        DebugBuffers.vertices[Index + 2] + Region.Origin[2],
+      );
+
+      const Target = ToLngLat(
+        DebugBuffers.vertices[Index + 3] + Region.Origin[0],
+
+        DebugBuffers.vertices[Index + 4] + Region.Origin[1],
+
+        DebugBuffers.vertices[Index + 5] + Region.Origin[2],
+      );
+
       Lines.push({
-        Source: [
-          DebugBuffers.vertices[Index] + Region.Origin[0],
+        Source,
 
-          DebugBuffers.vertices[Index + 1] + Region.Origin[1],
-
-          DebugBuffers.vertices[Index + 2] + Region.Origin[2],
-        ],
-
-        Target: [
-          DebugBuffers.vertices[Index + 3] + Region.Origin[0],
-
-          DebugBuffers.vertices[Index + 4] + Region.Origin[1],
-
-          DebugBuffers.vertices[Index + 5] + Region.Origin[2],
-        ],
+        Target,
 
         Color: [
           DebugBuffers.colors[ColorIndex] * 255,
@@ -1252,8 +1346,6 @@ export default class PhysicsWidget extends BaseWidget<PhysicsWidgetOptions> {
 
     const Layer = new PhysicsDebugLayer({
       data: this.GenerateDebugLines(Region),
-
-      coordinateOrigin: this.Options.CoordinateOrigin,
     });
 
     if (this.IsDebugLayerAdded) {
