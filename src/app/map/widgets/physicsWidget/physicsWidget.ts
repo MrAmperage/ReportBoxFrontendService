@@ -563,11 +563,7 @@ export default class PhysicsWidget extends BaseWidget<PhysicsWidgetOptions> {
   }
 
   @ExportApi()
-  AddCollider(
-    Description: PhysicsColliderDescription,
-
-    ParentId?: number,
-  ): number {
+  AddCollider(Description: PhysicsColliderDescription, ParentId?: number): number {
     if (ParentId !== undefined) {
       const ParentRecord = this.RigidBodies.get(ParentId);
 
@@ -606,6 +602,10 @@ export default class PhysicsWidget extends BaseWidget<PhysicsWidgetOptions> {
 
       ParentRecord.ColliderIds.add(Id);
 
+      if (this.Options.IsEnableDebug && this.DebugRegionId === Region.Id) {
+        this.UpdateDebugLayer();
+      }
+
       return Id;
     }
 
@@ -625,6 +625,14 @@ export default class PhysicsWidget extends BaseWidget<PhysicsWidgetOptions> {
       for (const Region of this.Regions.values()) {
         this.AttachStaticColliderToRegion(Record, Region);
       }
+
+      if (
+        this.Options.IsEnableDebug &&
+        this.DebugRegionId !== undefined &&
+        Record.RegionHandles.has(this.DebugRegionId)
+      ) {
+        this.UpdateDebugLayer();
+      }
     } catch (Error) {
       this.RemoveCollider(Id);
 
@@ -641,6 +649,11 @@ export default class PhysicsWidget extends BaseWidget<PhysicsWidgetOptions> {
     if (Record === undefined) {
       return;
     }
+
+    const IsDebugRegionAffected =
+      this.Options.IsEnableDebug &&
+      this.DebugRegionId !== undefined &&
+      Record.RegionHandles.has(this.DebugRegionId);
 
     for (const [RegionId, Handle] of Record.RegionHandles) {
       const Region = this.Regions.get(RegionId);
@@ -663,6 +676,10 @@ export default class PhysicsWidget extends BaseWidget<PhysicsWidgetOptions> {
     }
 
     this.Colliders.delete(Id);
+
+    if (IsDebugRegionAffected) {
+      this.UpdateDebugLayer();
+    }
   }
 
   GetModelBounds(Model: Object3D): Box3 {
