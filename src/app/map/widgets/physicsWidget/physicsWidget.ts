@@ -37,7 +37,7 @@ export default class PhysicsWidget extends BaseWidget<PhysicsWidgetOptions> {
   }
   Options: PhysicsWidgetOptions = {
     Id: 'PhysicsWidget',
-    IsEnableDebug: false,
+    IsEnableDebug: true,
     IsEnablePhysics: true,
     CoordinateOrigin: [0, 0, 0],
   };
@@ -239,28 +239,39 @@ export default class PhysicsWidget extends BaseWidget<PhysicsWidgetOptions> {
     if (this.PhysicsAnimationFrameId !== undefined) {
       return;
     }
+
     this.World.timestep = this.PhysicsTimeStep;
+
     this.LastPhysicsTime = performance.now();
     this.PhysicsAccumulator = 0;
+
     const Step = (CurrentTime: number) => {
       const DeltaTime = (CurrentTime - this.LastPhysicsTime) / 1000;
+
       this.LastPhysicsTime = CurrentTime;
       this.PhysicsAccumulator += DeltaTime;
+
       let Steps = 0;
+
       while (this.PhysicsAccumulator >= this.PhysicsTimeStep && Steps < this.MaxStepsPerFrame) {
         this.World.step();
+
         this.PhysicsAccumulator -= this.PhysicsTimeStep;
+
         Steps++;
       }
+
       if (Steps === this.MaxStepsPerFrame) {
         this.PhysicsAccumulator %= this.PhysicsTimeStep;
       }
+
       if (this.Options.IsEnableDebug) {
         this.UpdateLayer(new PhysicsDebugLayer(this.World, this.Options.CoordinateOrigin));
       }
 
       this.PhysicsAnimationFrameId = requestAnimationFrame(Step);
     };
+
     this.PhysicsAnimationFrameId = requestAnimationFrame(Step);
   }
 }
