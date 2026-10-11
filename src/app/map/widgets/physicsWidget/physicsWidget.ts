@@ -538,27 +538,25 @@ export default class PhysicsWidget extends BaseWidget<PhysicsWidgetOptions> {
   @ExportApi()
   RemoveRigidBody(Id: number): void {
     const Record = this.RigidBodies.get(Id);
-
     if (Record === undefined) {
       return;
     }
-
     const Region = this.Regions.get(Record.RegionId);
-
+    const IsDebugRegionAffected =
+      this.Options.IsEnableDebug && this.DebugRegionId === Record.RegionId;
     if (Region !== undefined) {
       const RigidBody = Region.World.getRigidBody(Record.Handle);
-
       if (RigidBody != null) {
         Region.World.removeRigidBody(RigidBody);
       }
     }
-
     for (const ColliderId of Record.ColliderIds) {
       this.Colliders.delete(ColliderId);
     }
-
     this.RigidBodies.delete(Id);
-
+    if (IsDebugRegionAffected) {
+      this.UpdateDebugLayer();
+    }
     this.TryRemoveRegion(Record.RegionId);
   }
 

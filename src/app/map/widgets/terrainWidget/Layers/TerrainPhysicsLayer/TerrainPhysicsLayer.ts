@@ -106,6 +106,17 @@ export default class TerrainPhysicsLayer extends TerrainLayer {
     if (Tiles === undefined) {
       return;
     }
+
+    const ActiveTileIds = new Set(Tiles.map((Tile) => Tile.id));
+
+    for (const [TileId] of this.TerrainColliders) {
+      if (ActiveTileIds.has(TileId)) {
+        continue;
+      }
+
+      this.RemoveTerrainCollider(TileId);
+    }
+
     for (const Tile of Tiles) {
       this.HandleTileLoad(Tile);
     }
