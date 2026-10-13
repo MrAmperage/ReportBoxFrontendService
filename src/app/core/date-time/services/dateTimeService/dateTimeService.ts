@@ -1,17 +1,21 @@
 import { Injectable } from '@angular/core';
-import { transpose } from 'date-fns';
-import { TZDate, tz } from '@date-fns/tz';
+import { DateTime } from 'luxon';
 
 @Injectable({ providedIn: 'root' })
 export default class DateTimeService {
-  DateToTimeZone(Value: Date, TimeZone: string): Date {
-    const ZonedDate = new TZDate(Value.getTime(), TimeZone);
+  private TimeZone = 'Asia/Bangkok';
 
-    return transpose(ZonedDate, Date);
+  DateToTimeZone(value: Date): Date {
+    return DateTime.fromJSDate(value)
+      .setZone(this.TimeZone)
+      .setZone('local', { keepLocalTime: true })
+      .toJSDate();
   }
 
-  DateToUtc(Value: Date, TimeZone: string): Date {
-    const ZonedDate = transpose(Value, tz(TimeZone));
-    return new Date(ZonedDate.getTime());
+  DateToUtc(value: Date): Date {
+    return DateTime.fromJSDate(value)
+      .setZone(this.TimeZone, { keepLocalTime: true })
+      .toUTC()
+      .toJSDate();
   }
 }
