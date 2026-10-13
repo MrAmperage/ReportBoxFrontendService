@@ -5,15 +5,15 @@ import { DateTime } from 'luxon';
 export default class DateTimeService {
   private TimeZone = 'Asia/Bangkok';
 
-  DateToTimeZone(value: Date): Date {
-    return DateTime.fromJSDate(value)
+  DateToTimeZone(Value: Date): Date {
+    return DateTime.fromJSDate(Value)
       .setZone(this.TimeZone)
       .setZone('local', { keepLocalTime: true })
       .toJSDate();
   }
 
-  DateToUtc(value: Date): Date {
-    return DateTime.fromJSDate(value)
+  DateToUtc(Value: Date): Date {
+    return DateTime.fromJSDate(Value)
       .setZone(this.TimeZone, { keepLocalTime: true })
       .toUTC()
       .toJSDate();
