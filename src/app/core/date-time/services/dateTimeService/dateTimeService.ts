@@ -3,19 +3,41 @@ import { DateTime } from 'luxon';
 
 @Injectable({ providedIn: 'root' })
 export default class DateTimeService {
-  private TimeZone = 'Asia/Bangkok';
+  Timezone!: string;
 
-  DateToTimeZone(Value: Date): Date {
-    return DateTime.fromJSDate(Value)
-      .setZone(this.TimeZone)
-      .setZone('local', { keepLocalTime: true })
+  DateToUTC(Value: Date): Date {
+    if (!this.Timezone) {
+      return Value;
+    }
+
+    return DateTime.fromObject(
+      {
+        year: Value.getFullYear(),
+        month: Value.getMonth() + 1,
+        day: Value.getDate(),
+        hour: Value.getHours(),
+        minute: Value.getMinutes(),
+        second: Value.getSeconds(),
+        millisecond: Value.getMilliseconds(),
+      },
+      {
+        zone: this.Timezone,
+      },
+    )
+      .toUTC()
       .toJSDate();
   }
 
-  DateToUtc(Value: Date): Date {
+  DateToTimezone(Value: Date): Date {
+    if (!this.Timezone) {
+      return Value;
+    }
+
     return DateTime.fromJSDate(Value)
-      .setZone(this.TimeZone, { keepLocalTime: true })
-      .toUTC()
+      .setZone(this.Timezone)
+      .setZone('local', {
+        keepLocalTime: true,
+      })
       .toJSDate();
   }
 }
