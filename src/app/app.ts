@@ -4,9 +4,10 @@ import DeckGl from './map/deckgl/deckgl';
 import TransportWidget from './map/widgets/transportWidget/transportWidget';
 import PhysicsWidget from './map/widgets/physicsWidget/physicsWidget';
 import TerrainWidget from './map/widgets/terrainWidget/terrainWidget';
+import Shell from './layout/shell/shell';
 
 @Component({
-  imports: [RouterOutlet, DeckGl, TransportWidget, PhysicsWidget, TerrainWidget],
+  imports: [Shell, DeckGl, TerrainWidget, TransportWidget, PhysicsWidget],
   selector: 'app-root',
   styleUrl: './app.css',
   templateUrl: './app.html',
