@@ -25,7 +25,9 @@
     >
       <nz-form-item>
         <nz-form-control nzErrorTip="Введите логин">
-          <nz-input-wrapper nzPrefix="user">
+          <nz-input-wrapper>
+            <nz-icon nzInputPrefix nzType="user" />
+
             <input
               nz-input
               type="text"
@@ -39,7 +41,9 @@
 
       <nz-form-item>
         <nz-form-control nzErrorTip="Введите пароль">
-          <nz-input-password nzPrefix="lock">
+          <nz-input-password>
+            <nz-icon nzInputPrefix nzType="lock" />
+
             <input
               nz-input
               formControlName="Password"
