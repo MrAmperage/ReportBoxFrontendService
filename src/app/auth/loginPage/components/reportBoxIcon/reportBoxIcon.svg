@@ -1,0 +1,27 @@
+<svg
+    viewBox="0 0 64 64"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    aria-hidden="true"
+>
+    <path d="M34 7H47L53 13V32H34V7Z" />
+    <path d="M47 7V13H53" />
+    <path d="M39 17H48" />
+    <path d="M39 21H48" />
+    <path d="M39 25H46" />
+    <path d="M25 10H40L46 16V35H25V10Z" />
+    <path d="M40 10V16H46" />
+    <path d="M30 20H41" />
+    <path d="M30 24H41" />
+    <path d="M30 28H38" />
+    <path d="M16 15H32L38 21V39H16V15Z" />
+    <path d="M32 15V21H38" />
+    <path d="M21 25H32" />
+    <path d="M21 29H32" />
+    <path d="M21 33H29" />
+    <path d="M7 38L18 32L32 38L46 32L57 38L32 48L7 38Z" />
+    <path d="M7 38L16 48L32 48L18 42Z" />
+    <path d="M57 38L48 48L32 48L46 42Z" />
+    <path d="M10 43V53L32 61L54 53V43" />
+    <path d="M32 48V61" />
+</svg>

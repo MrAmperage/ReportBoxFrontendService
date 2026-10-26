@@ -6,4 +6,4 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
   styleUrl: './loginBackground.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export default class loginBackground {}
+export default class LoginBackground {}
