@@ -19,30 +19,32 @@
 }
 
 .LoginCard {
-  width: 460px;
+  width: 500px;
   max-width: 100%;
-  padding: 54px 48px 48px;
-  border: 1px solid var(--ant-primary-2);
+  padding: 52px 48px 46px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
   border-radius: 16px;
   background: rgba(255, 255, 255, 0.94);
   box-shadow:
     0 24px 70px rgba(24, 144, 255, 0.08),
-    0 4px 18px rgba(24, 144, 255, 0.05);
+    0 4px 18px rgba(0, 0, 0, 0.05);
+
   backdrop-filter: blur(8px);
 }
 
 .LoginHeader {
-  margin-bottom: 38px;
+  margin-bottom: 15px;
   text-align: center;
 }
 
 .Logo {
   display: flex;
+  align-items: center;
   justify-content: center;
   gap: 11px;
   margin-bottom: 11px;
   color: rgba(0, 0, 0, 0.85);
-  font-size: 36px;
+  font-size: 38px;
   font-weight: 700;
   line-height: 1;
   letter-spacing: 1px;
@@ -62,15 +64,49 @@
   width: 100%;
 }
 
+.LoginForm nz-form-item,
+.LoginForm nz-form-control,
+.LoginForm nz-input-wrapper,
+.LoginForm nz-input-password {
+  width: 100%;
+}
+
 .LoginForm nz-form-item {
   margin-bottom: 22px;
+}
+
+:host ::ng-deep .LoginForm .ant-input-affix-wrapper {
+  min-height: 56px;
+  padding-inline: 16px;
+  border-radius: 8px;
+}
+
+:host ::ng-deep .LoginForm .ant-input-affix-wrapper .ant-input {
+  font-size: 15px;
+}
+
+:host ::ng-deep .LoginForm .ant-input-prefix {
+  margin-inline-end: 12px;
+  color: rgba(0, 0, 0, 0.45);
+  font-size: 18px;
+}
+
+:host ::ng-deep .LoginForm .ant-input-suffix {
+  margin-inline-start: 12px;
+  color: rgba(0, 0, 0, 0.45);
+  font-size: 18px;
+}
+
+:host ::ng-deep .LoginForm .ant-input-affix-wrapper-focused {
+  border-color: var(--ant-primary-color);
+  box-shadow: 0 0 0 2px var(--ant-primary-color-outline);
 }
 
 .LoginOptions {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin: -3px 0 24px;
+  margin: -2px 0 26px;
 }
 
 .ForgotPassword {
@@ -83,25 +119,60 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 50px;
-  border-radius: 7px;
+  width: 100%;
+  height: 56px;
+  border-radius: 8px;
   font-size: 16px;
+  font-weight: 500;
 }
 
-@media (max-width: 520px) {
+@media (max-width: 540px) {
   .LoginContent {
     padding: 14px;
   }
 
   .LoginCard {
-    padding: 42px 28px 36px;
+    width: 100%;
+    padding: 44px 28px 38px;
+  }
+
+  .LoginHeader {
+    margin-bottom: 34px;
   }
 
   .Logo {
-    font-size: 31px;
+    font-size: 32px;
+  }
+
+  :host ::ng-deep .LoginForm .ant-input-affix-wrapper {
+    min-height: 52px;
+    padding-inline: 14px;
+  }
+
+  .LoginButton {
+    height: 52px;
+  }
+}
+
+@media (max-width: 380px) {
+  .LoginCard {
+    padding-inline: 22px;
+  }
+
+  .Logo {
+    gap: 8px;
+    font-size: 28px;
+  }
+
+  .Description {
+    font-size: 13px;
   }
 
   .LoginOptions {
-    gap: 12px;
+    gap: 10px;
+  }
+
+  .ForgotPassword {
+    font-size: 13px;
   }
 }
