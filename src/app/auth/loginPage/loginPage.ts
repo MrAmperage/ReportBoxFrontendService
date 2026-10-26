@@ -5,17 +5,8 @@ import { NzInputModule } from 'ng-zorro-antd/input';
 import { NzCheckboxModule } from 'ng-zorro-antd/checkbox';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzIconModule, provideNzIconsPatch } from 'ng-zorro-antd/icon';
-
-import {
-  ArrowRightOutline,
-  EyeInvisibleOutline,
-  EyeOutline,
-  LockOutline,
-  UserOutline,
-} from '@ant-design/icons-angular/icons';
-
+import { LockOutline, UserOutline } from '@ant-design/icons-angular/icons';
 import LoginBackground from './components/loginBackground/loginBackground';
-import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'LoginPage',
@@ -33,18 +24,9 @@ import { CommonModule } from '@angular/common';
     LoginBackground,
   ],
 
-  providers: [
-    provideNzIconsPatch([
-      UserOutline,
-      LockOutline,
-      EyeOutline,
-      EyeInvisibleOutline,
-      ArrowRightOutline,
-    ]),
-  ],
+  providers: [provideNzIconsPatch([UserOutline, LockOutline])],
 })
 export default class LoginPage {
-  readonly IsPasswordVisible = signal(false);
   readonly IsLoading = signal(false);
 
   readonly Form = new FormGroup({
@@ -63,20 +45,13 @@ export default class LoginPage {
     }),
   });
 
-  TogglePasswordVisibility(): void {
-    this.IsPasswordVisible.update((Value) => !Value);
-  }
-
   Submit(): void {
     if (this.Form.invalid) {
       this.Form.markAllAsTouched();
-
       return;
     }
 
-    const Credentials = this.Form.getRawValue();
-
-    console.log(Credentials);
+    console.log(this.Form.getRawValue());
   }
 
   ForgotPassword(): void {}

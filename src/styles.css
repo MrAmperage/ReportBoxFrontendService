@@ -1,4 +1,4 @@
 @import './styles/reset.css';
 @import './app/map/widgets/styles/widgets.css';
-@import './../node_modules/ng-zorro-antd/ng-zorro-antd.min.css';
+@import './../node_modules/ng-zorro-antd/ng-zorro-antd.variable.min.css';
 @import './styles/variables.css';
