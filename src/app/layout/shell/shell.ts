@@ -1,11 +1,12 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { NzLayoutComponent, NzSiderComponent, NzContentComponent } from 'ng-zorro-antd/layout';
+import { NzMenuDirective } from 'ng-zorro-antd/menu';
 
 @Component({
-  selector: 'shell',
+  selector: 'Shell',
   templateUrl: './shell.html',
   styleUrl: './shell.css',
-  imports: [RouterOutlet],
+  imports: [NzLayoutComponent, NzSiderComponent, NzContentComponent, NzMenuDirective],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class Shell {}
