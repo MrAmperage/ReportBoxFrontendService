@@ -1,1 +1,79 @@
 <loginBackground></loginBackground>
+
+<div class="LoginContent">
+  <div class="LoginCard">
+    <div class="LoginHeader">
+      <div class="Logo">
+        <span>REPORT</span>
+        <span class="LogoAccent">BOX</span>
+      </div>
+
+      <div class="Description">
+        Геопространственные решения
+        <br />
+        для анализа и управления
+      </div>
+    </div>
+
+    <form
+      nz-form
+      nzLayout="vertical"
+      nzSize="large"
+      class="LoginForm"
+      [formGroup]="Form"
+      (ngSubmit)="Submit()"
+    >
+      <nz-form-item>
+        <nz-form-control nzErrorTip="Введите логин">
+          <nz-input-wrapper nzPrefix="user">
+            <input
+              nz-input
+              type="text"
+              formControlName="Login"
+              placeholder="Логин"
+              autocomplete="username"
+            />
+          </nz-input-wrapper>
+        </nz-form-control>
+      </nz-form-item>
+
+      <nz-form-item>
+        <nz-form-control nzErrorTip="Введите пароль">
+          <nz-input-password nzPrefix="lock">
+            <input
+              nz-input
+              formControlName="Password"
+              placeholder="Пароль"
+              autocomplete="current-password"
+            />
+          </nz-input-password>
+        </nz-form-control>
+      </nz-form-item>
+
+      <div class="LoginOptions">
+        <label nz-checkbox formControlName="Remember"> Запомнить меня </label>
+
+        <button
+          nz-button
+          nzType="link"
+          type="button"
+          class="ForgotPassword"
+          (click)="ForgotPassword()"
+        >
+          Забыли пароль?
+        </button>
+      </div>
+
+      <button
+        nz-button
+        nzType="primary"
+        nzBlock
+        type="submit"
+        class="LoginButton"
+        [nzLoading]="IsLoading()"
+      >
+        Войти
+      </button>
+    </form>
+  </div>
+</div>
