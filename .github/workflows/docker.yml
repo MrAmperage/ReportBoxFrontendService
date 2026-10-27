@@ -49,6 +49,7 @@ jobs:
             ${{ env.IMAGE_NAME }}:${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
   deploy:
     name: Deploy to production
     needs: build
@@ -85,6 +86,8 @@ jobs:
              curl --fail --silent --show-error \
                --retry 10 \
                --retry-delay 2 \
-               --retry-connrefused \
+               --retry-all-errors \
+               --connect-timeout 5 \
+               --max-time 10 \
                http://127.0.0.1/ > /dev/null &&
-               docker image prune --all --force --filter until=168h"
+             docker image prune --all --force --filter until=168h"
